@@ -1,0 +1,10 @@
+﻿Render\RenderDataContex\DataPump\OsgScene\OsgScene\[scene_name]\SetNodeLodFactor [factor];
+
+作用：
+单独设置场景的LOD级别系数
+
+参数：
+[flag] - float，节点LOD级别系数，默认值1
+
+返回值：
+无

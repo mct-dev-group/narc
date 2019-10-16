@@ -1,0 +1,15 @@
+﻿Render\RenderDataContex\DataPump\OsgScene\SetClipZ [vertex_count] [z] [p1_x] [p1_y] ... [pn_x] [pn_y] [inv];
+
+作用：
+设置Osg压平范围，位于轮廓线内的点将被压平
+
+参数：
+[vertex_count] - int，轮廓线的端点数量，为0时表示关闭压平功能，后续参数可省略
+[z] - float，压平高程
+[pn_x] - double，轮廓线的第n个顶点的X坐标
+[pn_y] - double，轮廓线的第n个顶点的Y坐标
+[inv] - int，是否反向选择，为0表示正向选择，为1表示反向选择（区域外压平，区域内保持不变）
+#轮廓线不能自交（即轮廓应为简单多边形），无需封闭
+
+返回值：
+无

@@ -1,0 +1,10 @@
+﻿Render\RenderDataContex\DataPump\SetMaxClientRequest [count];
+
+作用：
+设置最大同时发起请求的数量
+
+参数：
+[count] - int，最大同时请求数量，默认值16
+
+返回值：
+无

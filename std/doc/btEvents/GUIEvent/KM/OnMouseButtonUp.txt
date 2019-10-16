@@ -1,0 +1,9 @@
+﻿GUIEvent\KM\OnMouseButtonUp
+
+发送时机：
+鼠标按键弹起时
+
+参数：
+ep[0] - int，鼠标按键ID，0为左键，1为中键，2为右键
+ep[1] - int，光标x坐标
+ep[2] - int，光标y坐标

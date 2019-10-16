@@ -1,0 +1,22 @@
+Render\RenderDataContex\ModelScene\ModelScene\[scene_name]\AppendMotion [instance_name] [scale_x] [scale_y] [scale_z] [rotate_axis_x] [rotate_axis_y] [rotate_axis_z] [rotate_angle] [translate_x] [translate_y] [translate_z] [duration];
+
+作用：
+附加实例动作。实例添加动作后，会在[duration]时间内，线性变换至目标参数。一个实例同一时刻只能附加一个动作，后附加的动作会覆盖先覆盖的动作，并且动作起点为实例当前状态
+
+参数：
+[scene_Name] - string，场景名
+[instance_name] - string，实例名
+[scale_x] - float，目标x方向拉伸系数
+[scale_y] - float，目标y方向拉伸系数
+[scale_z] - float，目标z方向拉伸系数
+[rotate_axis_x] - float，目标旋转轴向量x分量
+[rotate_axis_y] - float，目标旋转轴向量y分量
+[rotate_axis_z] - float，目标旋转轴向量z分量
+[rotate_angle] - float，目标旋转角（弧度）
+[translate_x] - double，目标x轴平移系数
+[translate_y] - double，目标y轴平移系数
+[translate_z] - double，目标z轴平移系数
+[duration] - float，持续时间，单位"秒"
+
+返回值：
+无

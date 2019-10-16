@@ -1,0 +1,7 @@
+Render\RenderDataContex\ModelScene\OnOpen
+
+发送时机：
+场景打开时
+
+参数：
+ep[0] - string，场景名

@@ -1,0 +1,9 @@
+﻿GUIEvent\KM\OnMouseWheel
+
+发送时机：
+鼠标滚轮滚动时
+
+参数：
+ep[0] - float，滚动距离
+ep[1] - int，光标x坐标
+ep[2] - int，光标y坐标

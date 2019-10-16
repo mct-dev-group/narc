@@ -1,0 +1,8 @@
+﻿Render\RenderDataContex\ModelScene\ModelScene\[scene_name]\SetNodeLodFactor [lod];
+
+作用：
+设置场景的Lod等级系数
+
+参数：
+[scene_name] - string，场景名
+[lod] - float，Lod等级系数

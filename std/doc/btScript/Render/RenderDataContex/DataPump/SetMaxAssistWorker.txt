@@ -1,0 +1,10 @@
+Render\RenderDataContex\DataPump\SetMaxAssistWorker [worker_count];
+
+作用：
+设置辅助worker数量
+
+参数：
+[worker_count] - int，worker数量
+
+返回值：
+无

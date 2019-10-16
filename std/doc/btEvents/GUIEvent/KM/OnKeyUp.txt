@@ -1,0 +1,7 @@
+﻿GUIEvent\KM\OnKeyUp
+
+发送时机：
+键盘按键弹起时
+
+参数：
+ep[0] - int，键盘Key值

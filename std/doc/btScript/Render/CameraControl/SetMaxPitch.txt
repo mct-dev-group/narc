@@ -1,0 +1,11 @@
+﻿Render\CameraControl\SetMaxPitch [pitch];
+
+作用：
+设置最大俯仰角
+
+参数：
+[pitch] - float，最大俯仰角，默认值为pi(3.1415926)
+
+
+返回值：
+无

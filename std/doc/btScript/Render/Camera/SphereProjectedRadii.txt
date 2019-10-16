@@ -1,0 +1,15 @@
+﻿Render\Camera\SphereProjectedRadii [cx] [cy] [cz] [radii];
+
+作用：
+计算球在窗口坐标系中的投影半径
+
+参数：
+[cx] - double，球心在世界坐标系中的X坐标
+[cy] - double，球心在世界坐标系中的Y坐标
+[cz] - double，球心在世界坐标系中的Z坐标
+[radii] - float，球的半径
+
+返回值：
+Log0 : [pradii]
+[pradii] - float，球在窗口坐标系中的投影半径（以像素为单位）
+

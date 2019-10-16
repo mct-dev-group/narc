@@ -1,0 +1,16 @@
+﻿Render\CameraControl\FlyTo3 [cx] [cy] [cz] [lx] [ly] [lz] [time];
+
+作用：
+飞行至指定视点
+
+参数：
+[cx] - double，新相机点X
+[cy] - double，新相机点Y
+[cz] - double，新相机点Z
+[lx] - double，新视点X
+[ly] - double，新视点Y
+[lz] - double，新视点Z
+[time] - 飞行时间，以毫秒为单位
+
+返回值：
+无

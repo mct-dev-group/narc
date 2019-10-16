@@ -1,0 +1,16 @@
+﻿Render\Camera\ScreenToWorld [sx] [sy] [sz];
+
+作用：
+计算屏幕坐标系中的点在世界坐标系中的位置
+
+参数：
+[sx] - int，点在屏幕坐标系中的X坐标（以像素为单位）
+[sy] - int，点在屏幕坐标系中的Y坐标（以像素为单位）
+[sz] - float，点在屏幕坐标系中的深度
+
+返回值：
+Log0 : [wx] [wy] [wz]
+[wx] - double，点在世界坐标系中的X坐标
+[wy] - double，点在世界坐标系中的Y坐标
+[wz] - double，点在世界坐标系中的Z坐标
+

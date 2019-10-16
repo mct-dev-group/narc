@@ -1,0 +1,11 @@
+Render\RenderDataContex\DataPump\SetClientCacheSize [hdd_size] [mem_size];
+
+作用：
+设置客户端缓存大小。本脚本必须先于所有脚本执行方可生效。
+
+参数：
+[hdd_size] - int，文件系统缓存大小，单位为MB，H5前端该参数无效，必须为0
+[mem_size] - int，内存缓存大小，单位为MB
+
+返回值：
+无

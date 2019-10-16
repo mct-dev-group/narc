@@ -1,0 +1,8 @@
+﻿GUIEvent\KM\OnMouseMove
+
+发送时机：
+鼠标光标移动时
+
+参数：
+ep[0] - int，光标x坐标
+ep[1] - int，光标y坐标

@@ -1,0 +1,7 @@
+﻿Render\RenderDataContex\DataPump\OsgScene\OsgScene\[scene_name]\ClipZ [flag];
+
+作用：
+设置场景是否受压平影响
+
+参数：
+[flag] - bool，0为不受压平影响，1为受压平影响。默认为1

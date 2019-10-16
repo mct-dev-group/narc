@@ -1,0 +1,15 @@
+﻿Render\Camera\IsSphereVisible [cx] [cy] [cz] [radii];
+
+作用：
+判断球是否可见
+
+参数：
+[cx] - double，球心在世界坐标系中的X坐标
+[cy] - double，球心在世界坐标系中的Y坐标
+[cz] - double，球心在世界坐标系中的Z坐标
+[radii] - float，球的半径
+
+返回值：
+Log0 : [visible]
+[visible] - int，可见为1，否则为0
+

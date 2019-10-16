@@ -1,0 +1,13 @@
+﻿Plugin\ModelInstanceQuery\OnInstanceSelected
+
+发送时机：
+Instance选中时
+
+参数：
+[ep0] - string，场景名
+[ep1] - string，Instance全路径
+[ep2] - string，[hit] [wx] [wy] [wz]
+	[hit] = int，击中标志，若指定点击中了场景中的某个面则为1，否则为0
+	[wx] - double，点在世界坐标系中的X坐标
+	[wy] - double，点在世界坐标系中的Y坐标
+	[wz] - double，点在世界坐标系中的Z坐标

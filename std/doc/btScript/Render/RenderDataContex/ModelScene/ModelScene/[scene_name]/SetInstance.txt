@@ -1,0 +1,26 @@
+Render\RenderDataContex\ModelScene\ModelScene\[scene_name]\SetInstance [instance_name] [delete_flag] [symbol_name] [mirror_flag] [scale_x] [scale_y] [scale_z] [rotate_axis_x] [rotate_axis_y] [rotate_axis_z] [rotate_angle] [translate_x] [translate_y] [translate_z] [intersect_flag];
+
+作用：
+设置实例
+
+参数：
+[scene_Name] - string，场景名
+[instance_name] - string，实例名
+[delete_flag] - bool，删除标志
+[symbol_name] - string，符号名
+[mirror_flag] - bool，镜像标志
+[scale_x] - float，x方向拉伸系数
+[scale_y] - float，y方向拉伸系数
+[scale_z] - float，z方向拉伸系数
+[rotate_axis_x] - float，旋转轴向量x分量
+[rotate_axis_y] - float，旋转轴向量y分量
+[rotate_axis_z] - float，旋转轴向量z分量
+[rotate_angle] - float，旋转角（弧度）
+[translate_x] - double，x轴平移系数
+[translate_y] - double，y轴平移系数
+[translate_z] - double，z轴平移系数
+[intersect_flag] - bool，是否参与求交运算的标志
+
+
+返回值：
+无

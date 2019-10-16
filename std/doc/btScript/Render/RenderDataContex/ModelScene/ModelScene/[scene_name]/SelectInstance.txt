@@ -1,0 +1,13 @@
+Render\RenderDataContex\ModelScene\ModelScene\[scene_name]\SelectInstance [instance_name] [select_flag];
+
+作用：
+设置实例选中标志
+
+参数：
+[scene_Name] - string，场景名
+[instance_name] - string，实例名
+[select_flag] - bool，选中标志
+
+
+返回值：
+无

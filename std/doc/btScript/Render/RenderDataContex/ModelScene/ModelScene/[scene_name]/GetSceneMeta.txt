@@ -1,0 +1,11 @@
+﻿Render\RenderDataContex\ModelScene\ModelScene\[scene_name]\GetSceneMeta;
+
+作用：
+获取场景元数据
+
+参数：
+无
+
+返回值：
+Log0 : [meta]
+[meta] : string，场景元数据

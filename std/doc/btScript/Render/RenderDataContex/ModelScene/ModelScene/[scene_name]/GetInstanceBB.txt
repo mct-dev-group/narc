@@ -1,0 +1,18 @@
+﻿Render\RenderDataContex\ModelScene\ModelScene\[scene_name]\GetInstanceBB [instance_name];
+
+作用：
+获取实例的全局外包盒
+
+参数：
+[scene_Name] - string，场景名
+[instance_name] - string，实例名
+
+
+返回值：
+Log0 : [min_x] [min_y] [min_z] [max_x] [max_y] [max_z]
+[min_x] - double，外包盒最小x
+[min_y] - double，外包盒最小y
+[min_z] - double，外包盒最小z
+[max_x] - double，外包盒最大x
+[max_y] - double，外包盒最大y
+[max_z] - double，外包盒最大z

@@ -1,0 +1,7 @@
+﻿Render\RenderDataContex\ModelScene\ModelScene\[scene_name]\GetInstanceNameList;
+
+作用：
+设置场景是否显示的标志
+
+返回值：
+Log[N] ： 实例全路径名

@@ -1,0 +1,15 @@
+﻿Plugin\OsgFeatureAbstract\OnBldgPick
+
+发送时机：
+Bldg选中时
+
+参数：
+[ep0] - string，[px] [py] [pz]
+	选建筑时，点击的点的世界坐标
+[ep1] - string，[min_z] [max_z] [n] [P1X] [P1Y] ... [PnX] [PnY]
+	[min_z] - float，轮廓盒底部高程
+	[max_z] - float，轮廓盒顶部高程
+	[n] - int，轮廓线点数
+	[PnX] - double，第n个轮廓点的X坐标
+	[PnY] - double，第n个轮廓点的Y坐标
+	#轮廓盒通过二维轮廓线、盒底盒顶高程定义，轮廓线不封闭

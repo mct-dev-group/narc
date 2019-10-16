@@ -1,0 +1,25 @@
+﻿Render\RenderDataContex\DynamicFrame\AddWLine [id] [width] [org_x] [org_y] [org_z] [vertex_count] [vertex_list] [zbuf_enable];
+
+作用：
+添加等宽线
+
+参数：
+[id] - string，对象的uid，保证唯一性
+[width] - float，线宽，单位为像素
+[org_x] - double，对象的模型坐标系原点在世界坐标系中的x坐标
+[org_y] - double，对象的模型坐标系原点在世界坐标系中的y坐标
+[org_z] - double，对象的模型坐标系原点在世界坐标系中的z坐标
+[vertex_count] - int，顶点个数，[vertex_list]中所含定点数量必须与此相符
+[vertex_list] - 顶点列表，每个顶点依此为：[vx] [vy] [vz] [vr] [vg] [vb]
+[zbuf_enable] - int，为0表示该对象绘制时不开启深度检测，否则开启
+[vx] - float，顶点的x坐标
+[vy] - float，顶点的y坐标
+[vz] - float，顶点的z坐标
+[vr] - int，顶点的颜色r分量，[0, 255]
+[vg] - int，顶点的颜色g分量，[0, 255]
+[vb] - int，顶点的颜色b分量，[0, 255]
+
+返回值：
+无
+
+PS：该脚本中，英文正反括号及逗号跟空格一样，都可作为参数分割

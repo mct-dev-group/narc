@@ -1,0 +1,7 @@
+﻿Render\RenderDataContex\DataPump\OsgScene\OsgScene\[scene_name]\Show [flag];
+
+作用：
+设置场景是否显示的标志
+
+参数：
+[flag] - bool，0为不显示，1为显示。默认为1

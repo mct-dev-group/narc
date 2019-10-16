@@ -1,0 +1,15 @@
+﻿Render\SetClearColor [r] [g] [b];
+
+作用：
+设置背景色
+
+参数：
+[r] - int，红色分量，[0, 255]
+[g] - int，绿色分量，[0, 255]
+[b] - int，蓝色分量，[0, 255]
+
+返回值：
+无
+
+例子：
+Render\SetClearColor 255 128 0;

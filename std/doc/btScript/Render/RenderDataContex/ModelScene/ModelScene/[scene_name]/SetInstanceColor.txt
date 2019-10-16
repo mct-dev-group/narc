@@ -1,0 +1,16 @@
+﻿Render\RenderDataContex\ModelScene\ModelScene\[scene_name]\SetInstanceColor [instance_name] [r] [g] [b] [a];
+
+作用：
+设置实例选中标志
+
+参数：
+[scene_Name] - string，场景名
+[instance_name] - string，实例名
+[r] - float，红色系数，取值范围[0,1]
+[g] - float，绿色系数，取值范围[0,1]
+[b] - float，蓝色系数，取值范围[0,1]
+[a] - float，透明度系数，取值范围[0,1]
+
+
+返回值：
+无

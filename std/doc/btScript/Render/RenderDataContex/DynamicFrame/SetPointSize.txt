@@ -1,0 +1,10 @@
+﻿Render\RenderDataContex\DynamicFrame\SetPointSize [p_size];
+
+作用：
+设置接下来将要添加的点列的点尺寸
+
+参数：
+[p_size] - int，点尺寸，以像素为单位
+
+返回值：
+无

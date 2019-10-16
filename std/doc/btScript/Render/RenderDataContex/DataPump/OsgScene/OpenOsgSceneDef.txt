@@ -1,0 +1,16 @@
+Render\RenderDataContex\DataPump\OsgScene\OpenOsgSceneDef [src_name] [scene_name] [center_x] [center_y] [center_z] [radii] [threshold];
+
+作用：
+以延迟模式打开场景。使用延迟模式打开的场景，只有当其外包球在窗口系中的投影尺寸大于显示阈值（[threshold]）时方才载入
+
+参数：
+[src_name] - string，数据源名称（对于本地数据源，形如“file://E:\TestData”；对于Web远程数据源，形如“http://127.0.0.1:40001/Bentusi”）
+[scene_name] - string，场景名称
+[center_x] - double，场景中心X坐标
+[center_y] - double，场景中心Y坐标
+[center_z] - double，场景中心Z坐标
+[radii] - float，场景外包球半径
+[threshold] - int，显示阈值
+
+返回值：
+无

@@ -1,0 +1,10 @@
+﻿Render\RenderDataContex\DynamicFrame\DelWLine [id];
+
+作用：
+删除等宽线
+
+参数：
+[id] - string，对象的uid，保证唯一性
+
+返回值：
+无

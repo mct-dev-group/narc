@@ -1,0 +1,16 @@
+﻿Render\RenderDataContex\SetOsgAttribBox [min_z] [max_z] [color_tag] [n] [P1X] [P1Y] ... [PnX] [PnY];
+
+作用：
+设置Osg单体化属性高亮区域。
+
+参数：
+[min_z] - float，轮廓盒底部高程
+[max_z] - float，轮廓盒顶部高程
+[color_tag] - html格式颜色标签
+[n] - int，轮廓线点数
+[PnX] - double，第n个轮廓点的X坐标
+[PnY] - double，第n个轮廓点的Y坐标
+#轮廓盒通过二维轮廓线、盒底盒顶高程定义
+
+返回值：
+无

@@ -1,0 +1,11 @@
+﻿Render\RenderDataContex\DynamicFrame\DelRenderObj [id] [slot_id];
+
+作用：
+添加渲染对象
+
+参数：
+[id] - string，对象的uid，保证唯一性
+[slot_id] - int，渲染插口类型，取值：8=不带Alpha，16=带Alpha
+
+返回值：
+无

@@ -1,0 +1,13 @@
+﻿Render\RenderDataContex\ModelScene\ModelScene\[scene_name]\GetInstanceFullMat [instance_name];
+
+作用：
+获取实例的全局变换矩阵
+
+参数：
+[scene_Name] - string，场景名
+[instance_name] - string，实例名
+
+
+返回值：
+Log0 : [m00] [m01] [m02] [m03] [m10] [m11] [m12] [m13] [m20] [m21] [m22] [m23] [m30] [m31] [m32] [m33]
+[m00]~[m33] - double，变换矩阵元素

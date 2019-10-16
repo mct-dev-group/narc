@@ -1,0 +1,10 @@
+﻿Render\RenderDataContex\ModelScene\SetRenderStyle [style];
+
+作用：
+更改渲染模式
+
+参数：
+[style] - string，"0"或"RENDER_STYLE_NORMAL"为普通模式；"1"或"RENDER_STYLE_TRANSALL_BUT_SELECTED"为非选中透明模式
+
+返回值：
+无

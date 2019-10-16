@@ -1,0 +1,15 @@
+﻿Render\RenderDataContex\SetOsgClipBox [vertex_count] [min_z] [max_z] [p1_x] [p1_y] ... [pn_x] [pn_y];
+
+作用：
+设置Osg裁剪盒，位于裁剪盒内Osg点将被裁剪掉，不予显示。
+
+参数：
+[vertex_count] - int，裁剪盒轮廓线的端点数量，为0时表示关闭裁剪功能，后续参数可省略
+[min_z] - float，裁剪盒底面高度
+[max_z] - float，裁剪盒顶面高度
+[pn_x] - double，轮廓线的第n个顶点的X坐标
+[pn_y] - double，轮廓线的第n个顶点的Y坐标
+#裁剪盒通过轮廓线+底面高度+顶面高度的方式定义，轮廓线不能自交（即轮廓应为简单多边形），无需封闭
+
+返回值：
+无

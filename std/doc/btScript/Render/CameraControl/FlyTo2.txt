@@ -1,0 +1,12 @@
+﻿Render\CameraControl\FlyTo2 [lx] [ly] [lz];
+
+作用：
+飞行至指定视点
+
+参数：
+[lx] - double，新视点X
+[ly] - double，新视点Y
+[lz] - double，新视点Z
+
+返回值：
+无
