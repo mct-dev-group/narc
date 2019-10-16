@@ -79,12 +79,12 @@ export default {
                 count:sArr.length,
                 area:sArr.reduce((accumulator, currentValue) => accumulator + currentValue.area,0)
               });
-            }).catch(errpr=>{
-              console.error('获取统计信息错误!',error);
-            });
+            })
             this.chartData.statusMap=statusMap;
             this.$refs.checkChart.draw();
             this.chartLoading=false;
+          }).catch(error=>{
+            console.error('获取统计信息错误!',error);
           });
 
           break;
