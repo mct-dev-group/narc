@@ -2,7 +2,7 @@
   <div class="index">
     <el-button class="goBack" icon="el-icon-d-arrow-left" @click.native="goback">回到主地图</el-button>
     <div id="chartMap"></div>
-    <el-dialog title="项目列表" width="400px" :visible.sync="dialogTableVisible">
+    <el-dialog class="chartDialog" title="项目列表" width="400px" :visible.sync="dialogTableVisible">
       <ul class="proJ">
         <router-link
           style=""
@@ -36,20 +36,27 @@ function getMap (name, callback) {
     mapUrl += `province/${name}.json`;
   }
   
-  $.ajax({
-    type: "get",
-    url: mapUrl,
-    async: false,
-    dataType: "json",
-    success: function(data) {
-      if (callback) {
-        callback(data)
+  let _data = echarts.getMap(name);
+  if (_data) {
+    if (callback) {
+        callback(_data)
       }
-    },
-    error: function(err) {
-      console.log(err);
-    }
-  });
+  } else {
+    $.ajax({
+      type: "get",
+      url: mapUrl,
+      async: false,
+      dataType: "json",
+      success: function(data) {
+        if (callback) {
+          callback(data)
+        }
+      },
+      error: function(err) {
+        console.log(err);
+      }
+    });
+  }
 }
 
 export default {
@@ -71,7 +78,7 @@ export default {
   },
   methods: {
     goback () {
-      this.myChart.setOption({geo:{map:'china'}});
+      this.myChart.setOption(this.myOpt, true);
     },
     // 注册地图
     registerMapData(name ='china') {
@@ -113,8 +120,6 @@ export default {
               color: '#ffffff'
             },
           },
-          
-          roam: true,
           itemStyle: {
             normal: {
               areaColor: '#132937',
@@ -175,6 +180,10 @@ export default {
         }
         
       });
+      
+      window.addEventListener('resize', () => {
+        this.myChart.resize();
+      })
     }
   }
 }
@@ -201,15 +210,37 @@ export default {
   .proJ {
     list-style: none;
     cursor: pointer;
-    margin-left: -30px;
+    margin-left: -40px;
 
     li {
       background: #dedede;
-      height: 40px;
-      line-height: 40px;
-      font-size: 23px;
+      height: 35px;
+      line-height: 35px;
+      font-size: 20px;
       padding-left: 10px;
     }
   }
+
 }
+</style>
+<style lang="scss">
+.chartDialog.el-dialog__wrapper {
+  .el-dialog {
+    .el-dialog__header{
+      background: #33586C !important;
+      padding: 10px 20px 10px !important;
+      .el-dialog__title {
+        color: #ffffff;
+      }
+
+      .el-dialog__headerbtn{
+        top: 10px !important;
+      }
+    }
+    .el-dialog__body {
+      padding: 15px 10px;
+    }
+  }
+}
+
 </style>
