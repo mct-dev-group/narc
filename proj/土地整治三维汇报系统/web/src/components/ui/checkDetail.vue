@@ -50,7 +50,7 @@ export default {
   watch:{
     details:function(){
       if(this.details){
-        this.status=this.details.status;
+        this.status=this.details.status+'';
       }      
     }
   },

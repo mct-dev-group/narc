@@ -114,6 +114,7 @@ export default {
     closeTabsBox(){
       this.$emit('update:showTabs');
       this.$emit('update:activeTab');
+      this.$emit('update:lastLayer');
       this.$refs.uploadFile&&this.$refs.uploadFile.clearFileList();
       this.$refs.checkFile&&this.$refs.checkFile.clearFile();
       this.$refs.checkDetail.clear();

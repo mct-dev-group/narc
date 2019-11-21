@@ -39,3 +39,6 @@ config.services = {
 }
 //上传
 config.server='http://localhost:7001/';
+
+config.indePbUrl='http://192.168.0.250:9006/pb/';
+config.terrainPbUrl='http://192.168.0.250:9006/terrain/';

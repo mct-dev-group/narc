@@ -33,6 +33,7 @@
       :dataForTabs='dataForTabs'
       @update:showTabs='showTabs=false'
       @update:activeTab='activeTab="0"'
+      @update:lastLayer='lastLayer=""'
     />
   </div>
 </template>
@@ -116,6 +117,7 @@ export default {
           }, 2000)
     },
     lastLayer(val){
+      if(!val)return;
       const arr=val.split('_');
       const data=this.$refs.tree.getNode(arr[0]).data;
       this.getCurrentAreaInfo(data,arr[1]);
@@ -166,10 +168,11 @@ export default {
       if(!data.from_table) return;
       this.$store.commit('setShowMenu', true);
       // this.showTabs=false;
+      this.$refs.tabs.closeTabsBox();
 
       this.lastLayer=node.key+'_true';
 
-      this.$refs.tabs.closeTabsBox();
+      
       const menuDom=document.getElementById('menuCotainer');
       menuDom.style.left=evt.clientX+'px';
       menuDom.style.top=evt.clientY+'px';
@@ -266,7 +269,7 @@ export default {
         bt_Util.executeScript("Render\\RenderDataContex\\SetOsgAttribBox 0;");
       }
 
-    }
+    },    
   },
   mounted(){
     this.DB=this.$store.state.db;
@@ -325,6 +328,27 @@ export default {
       });
       return makeTree(tree);
     }
+    // bt_event.addEventListener('GUIEvent\\KM\\OnMouseClick',function(evt){
+    //   if(evt[0]===2){
+    //     th.setLight('');
+    //   }
+    // });
+    
+    // document.body.addEventListener('keyup',clearLight.bind(this));
+  },
+  beforeDestroy(){
+    // document.body.removeEventListener();
+  }
+}
+
+function clearLight(evt){
+  console.log(111);
+  if(evt.keyCode===27){
+    this.setLight('');
+    if(this.AnnoTimeout){
+      clearTimeout(this.AnnoTimeout);
+    }
+    bt_Plug_Annotation.removeAnnotation(this.AnnoId);
   }
 }
 </script>
