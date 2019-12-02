@@ -1,0 +1,164 @@
+<template>
+  <div class="processFile">
+    <el-row v-for="(item,index) of itmesOfChanges" :key='index'>
+      <el-col :span="8" v-for="(val,i) of item" :key='i'>
+        <el-card shadow='hover'>          
+          <p  class="cardTitle">{{val[1]}}</p>          
+          <el-upload
+            :ref='val[0]'
+            action
+            accept='application/zip'
+            :limit='1'
+            :auto-upload='false'
+            :on-change='(file,fileList)=>{handleChange(file,fileList,val[0])}'
+            :on-exceed='(files, fileList)=>{handleExceed(files, fileList,val[0])}'
+            :on-remove='(files, fileList)=>{handleRemove(files, fileList,val[0])}'
+          >
+            <el-button type="info" icon='el-icon-plus' size="small" slot="trigger">添加</el-button>
+            <el-button type="primary" icon='el-icon-upload' size="small" @click="handleUpload(val[0],val[1])">上传</el-button>
+            <div slot="tip" class="el-upload__tip">请上传.zip文件。</div>
+          </el-upload>
+        </el-card>
+      </el-col>
+    </el-row>
+    <el-dialog
+      title="错误信息"
+      :visible.sync="dialogVisible"
+      :append-to-body='true'
+      center
+    >
+      <div v-for="(err,i) of errors" :key='i' class="errorItem">
+        <div>{{err.error}}</div>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import {post} from '@/utils/fetch';
+
+export default {
+  name: 'processFile',
+  data(){
+    return {
+      dialogVisible:false,
+      fileMap:new Map(),      
+      spotStatusChange:[...config.spotStatusChange],
+      errors:[],
+      DB:''
+    }
+  },
+  props:[],
+  computed:{
+    itmesOfChanges:function(){
+      let result=[];
+      const n=3;
+      const len=this.spotStatusChange.length;
+      const lines=len%n===0?len/3:Math.floor(len/3)+1;
+      for (let i = 0; i < lines; i++) {        
+        result.push(this.spotStatusChange.slice(i*n,i*n+n));
+      }
+      return result;
+    }
+  },
+  methods: {
+    clear(){
+      this.fileMap.clear();
+      this.errors=[];
+    },
+    handleChange(file,fileList,type){     
+      if(file.raw.type==='application/zip'){
+        this.fileMap.set(type,file.raw);
+      }else{
+        this.$message.error('请选择文件格式为.zip的文件上传！');        
+        this.$refs[type][0].clearFiles();
+      }
+    },
+    handleExceed(file,fileList,type){
+      this.$message.error('只能选择一个文件上传！');
+    },
+    handleRemove(file,fileList,type){
+      this.fileMap.has(type)&&this.fileMap.delete(type);
+    },
+    handleUpload(type,typeName){
+      if(this.fileMap.has(type)){
+        let file=this.fileMap.get(type);
+        const fileInfo = file.name.split(".");
+        const file_type = fileInfo.pop();
+        const file_name = fileInfo.join(".");
+        const fd = new FormData();
+        fd.append("file_name", file_name);
+        fd.append("file_type", file_type);        
+        fd.append("DB", this.DB);
+        fd.append(type, file);
+        post("/attachs/post"+type,fd).then(res=>{          
+          if(res.code===1){
+            this.$message.success(`${typeName}文件上传成功！`);
+          }else{
+            this.$message.error(`Error！`);
+            this.errors=res.data;
+            this.dialogVisible=true;
+          }
+        }).catch(error=>{
+          console.error(error);
+        }).finally(()=>{          
+          this.$refs[type][0].clearFiles();
+        });
+      }else{
+        this.$message.error(`${typeName}文件为空！请选择文件后上传！`);
+        return;
+      }
+    },
+  },
+  mounted(){
+    this.DB=this.$store.state.db;
+  },
+}
+</script>
+
+<style lang="scss" scoped>
+.processFile{
+  box-sizing: border-box;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  user-select: none;
+  padding-bottom:10px;
+
+  .cardTitle{
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .el-row~.el-row {
+    margin-top: 20px;    
+  }
+  .el-col{
+    padding:0px;
+
+    .el-card{
+      height: 130px;
+      text-align: center;
+      position: relative;
+
+      /deep/.el-card__body{
+        padding:5px;
+      }
+
+      /deep/.el-upload +.el-button{
+        margin-left: 5px;
+      }
+
+      /deep/.el-upload__tip,/deep/.el-upload-list{
+        text-align:left;
+      }      
+    }
+  }
+}
+.errorItem{
+  margin-bottom:10px;
+  font-size: 16px;
+}
+</style>

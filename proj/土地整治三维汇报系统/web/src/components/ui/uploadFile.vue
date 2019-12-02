@@ -1,8 +1,11 @@
 <template>
   <div class="uploadFile">
     <el-tabs tab-position='left' style="height: 340px;" :value='activeTab'>
-      <el-tab-pane label="前后对比" v-if='showType===2' name='1'>
+      <!-- <el-tab-pane label="前后对比" v-if='showType===2' name='1'>
         <uploadImage  ref='uploadImage' :gid='gid'/>
+      </el-tab-pane> -->
+      <el-tab-pane label="流程文件" name='1' v-if='showType===1' style='height:100%;'>
+        <processFile  ref='processFile' :gid='gid'/>
       </el-tab-pane>
       <el-tab-pane label='其他' style='height:100%;padding-right:10px;' name='2'>
         <uploadOther ref='uploadOther' :gid='gid'/>
@@ -12,8 +15,9 @@
 </template>
 
 <script>
-import uploadImage from '@/components/ui/uploadImage.vue';
-import uploadOther from '@/components/ui/uploadOther.vue';
+// import uploadImage from '@/components/ui/uploadImage.vue';
+import processFile from '@/components/ui/uploadfile/processFile.vue';
+import uploadOther from '@/components/ui/uploadfile/uploadOther.vue';
 export default {
   name: 'uploadFile',
   data(){
@@ -23,13 +27,15 @@ export default {
   },
   props:['gid','showType'],
   components:{
-    uploadImage,
+    // uploadImage,
+    processFile,
     uploadOther
   },
   methods: {
-    clearFileList(){
-      this.$refs.uploadImage&&this.$refs.uploadImage.clearFiles();
-      this.$refs.uploadOther.clearFiles();
+    clear(){
+      // this.$refs.uploadImage&&this.$refs.uploadImage.clearFiles();
+      this.$refs.uploadOther.clear();
+      this.$refs.processFile&&this.$refs.processFile.clear();
     }
   }
 }
@@ -39,7 +45,7 @@ export default {
  
 .uploadFile{  
   /deep/.el-tabs__content{
-    height: 100%;
+    height: 100%;    
   }
   .compareImage{
     padding-right: 10px;
@@ -68,9 +74,6 @@ export default {
     }
     .el-button{
       margin-top:10px; 
-    }
-    .previewImg{
-      width: 100%;
     }
   }  
 }

@@ -42,3 +42,32 @@ config.server='http://localhost:7001/';
 
 config.indePbUrl='http://192.168.0.250:9006/pb/';
 config.terrainPbUrl='http://192.168.0.250:9006/terrain/';
+
+//图斑状态
+config.spotStatus=new Map([
+  [1,'勘测定界'],
+  [2,'设计提交'],
+  [3,'立项审核'],
+  [4,'评审验收'],
+  [5,'变更确认'],
+  [6,'质量评定'],
+  [7,'指标确定'],  
+]);
+//图斑状态变更
+config.spotStatusChange=new Map([
+  ['F1to2','规划成果'],
+  ['F2to3','设计批复'],
+  ['F3to4','施工成果'],
+  ['F4to5','评审确认表'],
+  ['F5to6','变更确认表'],
+  ['F6to7','待定'],
+]);
+//图斑转态与可用状态变更对应关系
+config.spotStatusMapping=new Map([
+  [1,['F1to2']],
+  [2,['F1to2','F2to3']],
+  [3,['F2to3','F3to4']],
+  [4,['F3to4','F4to5']],
+  [5,['F4to5','F5to6']],
+  [6,['F5to6','F6to7']],
+]);

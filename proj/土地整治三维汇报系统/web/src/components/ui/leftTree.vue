@@ -33,7 +33,7 @@
       :dataForTabs='dataForTabs'
       @update:showTabs='showTabs=false'
       @update:activeTab='activeTab="0"'
-      @update:lastLayer='lastLayer=""'
+      @update:lastLayer='lastLayer="null"'
     />
   </div>
 </template>
@@ -116,11 +116,15 @@ export default {
             bt_Plug_Annotation.removeAnnotation(this.AnnoId);
           }, 2000)
     },
-    lastLayer(val){
-      if(!val)return;
-      const arr=val.split('_');
-      const data=this.$refs.tree.getNode(arr[0]).data;
-      this.getCurrentAreaInfo(data,arr[1]);
+    lastLayer:{
+      handler:function(val,oldval){
+        // console.log(val,oldval);
+        if(!val||val==='null')return;
+        const arr=val.split('_');
+        const data=this.$refs.tree.getNode(arr[0]).data;
+        this.getCurrentAreaInfo(data,arr[1]);
+      },
+      immediate: true
     }
   },
   computed:{
@@ -153,11 +157,7 @@ export default {
       }
       let leafNodeList=getLeafNodeList(data);
       let plan=leafNodeList.filter(v=>v.from_table==='plan');
-      this.dataForTabs.plan=plan;      
-      if(plan.length===0){
-        this.menu=menu.slice(1);
-        this.dataForTabs.showType=2;
-      }
+      this.dataForTabs.plan=plan;
       this.menuMousedown('4');
     },
     clickRow (data,node) {
@@ -169,8 +169,9 @@ export default {
       this.$store.commit('setShowMenu', true);
       // this.showTabs=false;
       this.$refs.tabs.closeTabsBox();
-
-      this.lastLayer=node.key+'_true';
+            
+      // this.lastLayer=node.key+'_true';
+      this.getCurrentAreaInfo(data,true);
 
       
       const menuDom=document.getElementById('menuCotainer');
@@ -199,10 +200,6 @@ export default {
       let leafNodeList=getLeafNodeList(data);
       let plan=leafNodeList.filter(v=>v.from_table==='plan');
       this.dataForTabs.plan=plan;
-      if(plan.length===0){
-        this.menu=menu.slice(1);
-        this.dataForTabs.showType=2;
-      }
     },
 
     menuMousedown(id){

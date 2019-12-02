@@ -46,7 +46,7 @@ export default {
       let filterArr=arr.filter(v=>{
         let type=v.name.split('.').slice(-1)[0];        
         return this.fileType.includes(type);
-      });      
+      });
       const th=this;
       const fds = filterArr.map(f => {
         const fileInfo = f.name.split(".");
@@ -62,7 +62,7 @@ export default {
       });     
       if(fds.length===0){
         this.$message.error(`无合法文件！请检查后重新上传！`);
-        this.clearFiles();
+        this.clear();
         return;
       }else if(filterArr.length<arr.length){
         this.$message.warning('检测到部分文件不合法，已过滤！');
@@ -80,12 +80,12 @@ export default {
         }else{
           this.$message.success('上传成功!');
         }        
-        this.clearFiles();
+        this.clear();
       }).catch(error=>{
         console.error('上传附件错误!',error);
       });
     },
-    clearFiles(){
+    clear(){
       this.$refs.uploadOther.clearFiles();
       this.fileList.clear();
     }

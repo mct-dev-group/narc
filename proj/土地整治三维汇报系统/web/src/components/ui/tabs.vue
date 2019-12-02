@@ -22,7 +22,7 @@
           <uploadFile ref='uploadFile' :gid='dataForTabs.gid' :showType='dataForTabs.showType'/>
         </el-tab-pane>
         <el-tab-pane label="查看详情" name='4'>
-          <checkDetail ref='checkDetail' :details='dataForTabs.details'/>
+          <checkDetail ref='checkDetail' :details.sync='dataForTabs.details' :showType='dataForTabs.showType' :closeTabsBox='closeTabsBox'/>
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -62,6 +62,7 @@ export default {
   methods: {
     handle(aName,oName){
       switch(aName){
+        //统计信息
         case '1':
           this.chartLoading=true;
           const plan=this.dataForTabs.plan;
@@ -69,17 +70,16 @@ export default {
 
           let promises=plan.map(v=>get('/attachs/query',{"sql":"select p.status,p.shape_area from plan p where p.gid="+v.id, "DB":this.DB}));
           Promise.all(promises).then(res=>{
-            const statusArr=res.map(s=>({status:s.data[0].status+'',area:s.data[0].shape_area*1}));
+            const statusArr=res.map(s=>({status:s.data[0].status,area:s.data[0].shape_area*1}));
             let statusMap=new Map();
-            //状态
-            const status=['1','2','3','4'];
-            status.forEach(v=>{
+            //状态            
+            for (const v of config.spotStatus.keys()) {
               let sArr=statusArr.filter(s=>s.status===v);
               statusMap.set(v,{
                 count:sArr.length,
                 area:sArr.reduce((accumulator, currentValue) => accumulator + currentValue.area,0)
               });
-            })
+            }
             this.chartData.statusMap=statusMap;
             this.$refs.checkChart.draw();
             this.chartLoading=false;
@@ -88,6 +88,7 @@ export default {
           });
 
           break;
+        //附件查看
         case '2':
           get("/attachs/getAttachmentListById/" +this.dataForTabs.gid+'/'+this.DB).then(res=>{
             this.files=res.data;
@@ -95,8 +96,9 @@ export default {
             this.checkLoading=true;
           });
           break;
+        //附件上传
         case '3':
-          this.$refs.uploadFile.activeTab=this.dataForTabs.showType===2?'1':'2';
+          this.$refs.uploadFile.activeTab=this.dataForTabs.showType===1?'1':'2';
           break;
       };
       switch(oName){
@@ -112,10 +114,11 @@ export default {
       }
     },
     closeTabsBox(){
+      console.log('called');
       this.$emit('update:showTabs');
       this.$emit('update:activeTab');
       this.$emit('update:lastLayer');
-      this.$refs.uploadFile&&this.$refs.uploadFile.clearFileList();
+      this.$refs.uploadFile&&this.$refs.uploadFile.clear();
       this.$refs.checkFile&&this.$refs.checkFile.clearFile();
       this.$refs.checkDetail.clear();
       this.$refs.checkChart&&this.$refs.checkChart.clearChart();
