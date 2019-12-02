@@ -355,7 +355,8 @@ class AttachmentsController extends Controller {
             const row = key.slice(1);
             if (row !== '1') {
               id = sheet1[ key ].v;
-              const attr = sheet1[ `D${row}` ].v;
+              let attr;
+              if (sheet1[ `D${row}` ]) attr = sheet1[ `D${row}` ].v;
               await service.attachments.postStep(step, id, null, gid, attr, DB);
               await service.geom.setStatus(id, n, DB);
             }
