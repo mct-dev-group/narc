@@ -1,61 +1,188 @@
 <template>
   <div class="index">
-    <div class="cityBox">
-      <div class="city" v-for="(item, index) in qhList" :key="index" @click="handleClick(item.value)">
-        <div class="img"></div>
-        <div class="title">{{item.title}}</div>
-      </div>
-    </div>
+    <el-button class="goBack" icon="el-icon-d-arrow-left" @click.native="goback">回到主地图</el-button>
+    <div id="chartMap"></div>
+    <el-dialog class="chartDialog" title="项目列表" width="400px" :visible.sync="dialogTableVisible">
+      <ul class="proJ">
+        <router-link
+          style=""
+          tag="li"
+          v-for="(item, index) in proJList" 
+          :key="index"
+          :to="{
+            name: 'home',
+            params: {
+              db: item.db
+            }
+          }"
+        >
+          {{item.title}}
+        </router-link>
+      </ul>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import echarts from 'echarts';
+import jsPY from 'js-pinyin';
+
+const basrUrl = '/assets/map/'
+function getMap (name, callback) {
+  let mapUrl = basrUrl;
+  if (name == 'china') {
+    mapUrl +=`${name}.json`;
+  } else {
+    mapUrl += `province/${name}.json`;
+  }
+  
+  let _data = echarts.getMap(name);
+  if (_data) {
+    if (callback) {
+        callback(_data)
+      }
+  } else {
+    $.ajax({
+      type: "get",
+      url: mapUrl,
+      async: false,
+      dataType: "json",
+      success: function(data) {
+        if (callback) {
+          callback(data)
+        }
+      },
+      error: function(err) {
+        console.log(err);
+      }
+    });
+  }
+}
+
 export default {
-  name: 'index',
+  name: 'test2',
   data () {
     return {
-      qhList: []
+      myChart: null,
+      myOpt: null,
+      dialogTableVisible: false,
+      proJList: []
     }
   },
   mounted () {
-    this.getqhList();
+    this.registerMapData();
+    this.initChart();
+    this.initOpt();
+    this.myChart.setOption(this.myOpt);
+    this.initEvent();
   },
   methods: {
-    getqhList () {
-      this.qhList = [
-        {
-          title: '淇滨',
-          value: 'qibin_db'
-        },{
-          title: '测试',
-          value: 'qibin'
-        },{
-          title: '其他',
-          value: 'qibin2'
-        },{
-          title: '其他',
-          value: 'qibin2'
-        },{
-          title: '其他',
-          value: 'qibin2'
-        },{
-          title: '其他',
-          value: 'qibin2'
-        },{
-          title: '其他',
-          value: 'qibin2'
-        },{
-          title: '其他',
-          value: 'qibin2'
-        }
-      ]
+    goback () {
+      this.myChart.setOption(this.myOpt, true);
     },
-    handleClick (val) {
-      this.$router.push({
-        name: 'home',
-        params: {
-          db: val
+    // 注册地图
+    registerMapData(name ='china') {
+      const data = getMap(name, data => {
+        echarts.registerMap(name, data);
+      });
+    },
+    // 初始化
+    initChart () {
+      this.myChart = echarts.init(document.getElementById('chartMap'));
+    },
+    initOpt () {
+      let option = {
+        // backgroundColor: '#080a20',
+        backgroundColor: '#080a20',
+        tooltip: {
+          trigger: 'item'
+        },
+        legend: {
+          orient: 'vertical',
+          top: 'bottom',
+          left: 'right',
+          data: ['北京 Top10', '上海 Top10', '广州 Top10'],
+          textStyle: {
+            color: '#fff'
+          },
+          selectedMode: 'single'
+        },
+        geo: {
+          map: 'china',
+          label: {
+            normal: {
+              show: true,
+              color: '#ffffff',
+              fontSize: 16
+            },
+            emphasis: {
+              show: true,
+              color: '#ffffff'
+            },
+          },
+          itemStyle: {
+            normal: {
+              areaColor: '#132937',
+              borderColor: '#0692a4'
+            },
+            emphasis: {
+              areaColor: '#0b1c2d'
+            }
+          },
+          regions: [
+            /** start 省 start */
+            {
+              name: '河南',
+              hasProj: true,
+              itemStyle: {
+                normal: {
+                  areaColor: '#15486d'
+                }
+              }
+            },
+            {
+              name: '鹤壁市',
+              hasProj: true,
+              proJList: [
+                {
+                  title: '淇滨区',
+                  db: 'qibin_db'
+                }
+              ],
+              itemStyle: {
+                normal: {
+                  areaColor: '#15486d'
+                }
+              }
+            }
+            /** end 省 end */
+          ]
         }
+      };
+      this.myOpt = option;
+    },
+    initEvent () {
+      this.myChart.on('click', params => {
+        const { name, region } = params;
+        if (region && region.hasProj && region.proJList) {
+          // 弹出县级项目列表
+          this.proJList = region.proJList;
+          this.dialogTableVisible = true;
+        } else if (region && region.hasProj) {
+          const py = name=='陕西' ? jsPY.getFullChars(name).toLowerCase()+'1' : jsPY.getFullChars(name).toLowerCase();
+          this.registerMapData(py);
+          this.myChart.setOption({geo:{map:py}});
+        } else {
+          this.$message({
+            message: '当前地区，暂无项目！！！',
+            type: 'warning'
+          });
+        }
+        
+      });
+      
+      window.addEventListener('resize', () => {
+        this.myChart.resize();
       })
     }
   }
@@ -64,42 +191,56 @@ export default {
 
 <style lang="scss" scoped>
 .index {
-  height: 100vh;
-  background: #dedede;
+  height: 100%;
 
-  .cityBox {
-    position: relative; 
-    top: 80px;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    padding-left: 100px;
-    padding-right: 100px;
+  .goBack {
+    position: absolute;
+    z-index: 6;
+    top: 70px;
+    margin-left: 10px;
 
-    .city {
-      margin:20px;
-      cursor: pointer;
-      width: 200px;
-      height: 240px;
-      background: #f7f7f7;
-      box-shadow: #d0cbcb 2px 2px 2px;
-      
-      .img {
-        width: 200px;
-        height: 200px;
-        background: #6fcffcd8;
-      }
-      .title {
-        height: 40px;
-        line-height: 40px;
-        text-align: center;
+    background: #132937;
+    border: 0;
+    border-radius: 0;
+  }  
+  #chartMap {
+    height: 100vh;
+  }
+
+  .proJ {
+    list-style: none;
+    cursor: pointer;
+    margin-left: -40px;
+
+    li {
+      background: #dedede;
+      height: 35px;
+      line-height: 35px;
+      font-size: 20px;
+      padding-left: 10px;
+    }
+  }
+
+}
+</style>
+<style lang="scss">
+.chartDialog.el-dialog__wrapper {
+  .el-dialog {
+    .el-dialog__header{
+      background: #33586C !important;
+      padding: 10px 20px 10px !important;
+      .el-dialog__title {
+        color: #ffffff;
       }
 
-      &:hover {
-        color: #264c5ed8;
+      .el-dialog__headerbtn{
+        top: 10px !important;
       }
+    }
+    .el-dialog__body {
+      padding: 15px 10px;
     }
   }
 }
+
 </style>
