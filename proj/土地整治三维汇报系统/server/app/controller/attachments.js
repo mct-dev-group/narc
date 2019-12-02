@@ -355,7 +355,8 @@ class AttachmentsController extends Controller {
             const row = key.slice(1);
             if (row !== '1') {
               id = sheet1[ key ].v;
-              const attr = sheet1[ `D${row}` ].v;
+              let attr;
+              if (sheet1[ `D${row}` ]) attr = sheet1[ `D${row}` ].v;
               await service.attachments.postStep(step, id, null, gid, attr, DB);
               await service.geom.setStatus(id, n, DB);
             }
@@ -374,7 +375,7 @@ class AttachmentsController extends Controller {
                   id = sheet1[ key ].v;
                   if (!id) throw '图斑唯一标识为空';
                   let attr;
-                  if (!sheet1[ `D${row}` ]) attr = sheet1[ `D${row}` ].v;
+                  if (sheet1[ `D${row}` ]) attr = sheet1[ `D${row}` ].v;
                   if (!sheet1[ `C${row}` ]) throw `未找到 ${id} 对应文件名`;
                   attach_file_name = sheet1[ `C${row}` ].v;
                   if (!attach_file_name) throw `未找到 ${key} 对应文件名`;
@@ -390,7 +391,7 @@ class AttachmentsController extends Controller {
         }
       }
     } catch (error) {
-      // console.log(3, error);
+      console.log(3, error);
       result.push({ id, error });
     }
     if (result.length === 0) {

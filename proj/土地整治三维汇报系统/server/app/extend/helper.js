@@ -40,7 +40,7 @@ module.exports = {
     const cmd = `${cmd7z} x ${filePath} ${unzipOutPath ? '-o' + unzipOutPath : ''}`;
     execSync(cmd);
     const files = fs.readdirSync(unzipOutPath);
-    const isFolder = files.map(f => fs.lstatSync(f).isDirectory()).every(Boolean);
+    const isFolder = files.map(f => fs.lstatSync(path.join(unzipOutPath, f)).isDirectory()).every(Boolean);
     return isFolder ? unzipOutPath + '/' + files[0] : unzipOutPath;
   },
   randomString() {
