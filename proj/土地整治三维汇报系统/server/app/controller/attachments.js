@@ -401,42 +401,27 @@ class AttachmentsController extends Controller {
   }
 
   async getF1to2Attach() {
-    const { ctx } = this;
-    await this.getAttachFmton([ 1, 2 ]);
-    ctx.body = rb;
+    return await this.getAttachFmton([ 1, 2 ]);
   }
 
   async getF2to3Attach() {
-    const { ctx } = this;
-    const { id, DB } = this.ctx.params;
-    const attachId = await this.service.attachments.getF2to3(id, DB);
-    this.ctx.params.id = attachId[0].f2to3;
-    await this.getAttachmentById();
-    ctx.body = rb;
+    return await this.getAttachFmton([ 2, 3 ]);
   }
 
   async getF3to4Attach() {
-    const { ctx } = this;
-    await this.getAttachFmton([ 3, 4 ]);
-    ctx.body = rb;
+    return await this.getAttachFmton([ 3, 4 ]);
   }
 
   async getF4to5Attach() {
-    const { ctx } = this;
-    await this.getAttachFmton([ 4, 5 ]);
-    ctx.body = rb;
+    return await this.getAttachFmton([ 4, 5 ]);
   }
 
   async getF5to6Attach() {
-    const { ctx } = this;
-    await this.getAttachFmton([ 5, 6 ]);
-    ctx.body = rb;
+    return await this.getAttachFmton([ 5, 6 ]);
   }
 
   async getF6to7Attach() {
-    const { ctx } = this;
-    await this.getAttachFmton([ 6, 7 ]);
-    ctx.body = rb;
+    return await this.getAttachFmton([ 6, 7 ]);
   }
 
   async getAttachFmton([ m, n ]) {
@@ -445,8 +430,21 @@ class AttachmentsController extends Controller {
     const { getFileName, getFileType } = ctx.helper;
     const id = this.ctx.params.id;
     const DB = this.ctx.params.DB;
+    const step = `f${m}to${n}`;
     try {
-      const step = `f${m}to${n}`;
+      if (m === 2 && n === 3) {
+        const { id, DB } = this.ctx.params;
+        const attachId = await this.service.attachments.getF2to3(id, DB);
+        const attaId = attachId[0].f2to3;
+        const result = await service.attachments.getAttachmentById(attaId, DB);
+        const { file_type, blob_data } = result[0];
+        const buffer = Buffer.from(blob_data, 'binary');
+        const bufferBase64 = buffer.toString('base64');
+        result[0].mime_type = mime.lookup(file_type);
+        result[0].blob_data = bufferBase64;
+        result[0].step = step;
+        return result[0];
+      }
       const result = await service.attachments.getAttachmentBySetpAndId(step, id, DB);
       const file_full_name = result[0][`${step}_filename`];
       const file_name = getFileName(file_full_name);
@@ -457,12 +455,37 @@ class AttachmentsController extends Controller {
       const res = {};
       res.file_name = file_name;
       res.file_type = file_type;
+      res.step = step;
       res.mime_type = mime.lookup(file_type);
       res.blob_data = bufferBase64;
-      rb = helper.getSuccess(res);
+      return res
     } catch (error) {
-      // console.log(error);
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async getAllFmtonAttach() {
+    const { ctx, service } = this;
+    const helper = ctx.helper;
+    const id = this.ctx.params.id;
+    const DB = this.ctx.params.DB;
+    const status = await service.attachments.getStatus(id, DB);
+    try {
+      let i = status[0].status;
+      const result = [];
+      while (i > 1) {
+        const stepFn = `getF${i - 1}to${i}Attach`;
+        const data = await this[stepFn]();
+        result.push(data);
+        i -= 1;
+      }
+      rb = helper.getSuccess(result);
+    } catch (error) {
+      console.log(error);
       rb = helper.getFailed(error);
+    } finally {
+      ctx.body = rb;
     }
   }
 }
