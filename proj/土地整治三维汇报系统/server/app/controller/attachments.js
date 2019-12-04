@@ -426,7 +426,6 @@ class AttachmentsController extends Controller {
 
   async getAttachFmton([ m, n ]) {
     const { ctx, service } = this;
-    const helper = ctx.helper;
     const { getFileName, getFileType } = ctx.helper;
     const id = this.ctx.params.id;
     const DB = this.ctx.params.DB;
@@ -442,7 +441,7 @@ class AttachmentsController extends Controller {
         const bufferBase64 = buffer.toString('base64');
         result[0].mime_type = mime.lookup(file_type);
         result[0].blob_data = bufferBase64;
-        result[0].step = step;
+        result[0].step = `F${m}to${n}`;
         return result[0];
       }
       const result = await service.attachments.getAttachmentBySetpAndId(step, id, DB);
@@ -455,10 +454,10 @@ class AttachmentsController extends Controller {
       const res = {};
       res.file_name = file_name;
       res.file_type = file_type;
-      res.step = step;
+      res.step = `F${m}to${n}`;
       res.mime_type = mime.lookup(file_type);
       res.blob_data = bufferBase64;
-      return res
+      return res;
     } catch (error) {
       console.log(error);
       throw error;
