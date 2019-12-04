@@ -16,7 +16,7 @@
           <checkChart v-loading='chartLoading' :chartData='chartData' ref='checkChart' />
         </el-tab-pane>
         <el-tab-pane label="附件查看" name='2' v-if='dataForTabs.showType!==3'>
-          <checkFile v-loading='checkLoading' ref='checkFile' :gid='dataForTabs.gid' :showType='dataForTabs.showType' :files='files' @updata-checkLoading='checkLoading=false'/>
+          <checkFile v-loading='checkLoading' ref='checkFile' :gid='dataForTabs.gid' :planId='dataForTabs.planId' :showType='dataForTabs.showType' :files='files' @update:checkLoading='checkLoading=false'/>
         </el-tab-pane>
         <el-tab-pane label="附件上传" name='3' v-if='dataForTabs.showType!==3'>
           <uploadFile ref='uploadFile' :gid='dataForTabs.gid' :showType='dataForTabs.showType'/>
@@ -92,7 +92,8 @@ export default {
         case '2':
           get("/attachs/getAttachmentListById/" +this.dataForTabs.gid+'/'+this.DB).then(res=>{
             this.files=res.data;
-            this.$refs.checkFile.activeTab=this.dataForTabs.showType===2?'1':'2';
+            // this.$refs.checkFile.activeTab=this.dataForTabs.showType===1?'1':'2';
+            this.$refs.checkFile.activeTab='1';
             this.checkLoading=true;
           });
           break;

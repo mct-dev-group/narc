@@ -169,7 +169,7 @@ export default {
       this.$store.commit('setShowMenu', true);
       // this.showTabs=false;
       this.$refs.tabs.closeTabsBox();
-            
+      console.log(data);
       // this.lastLayer=node.key+'_true';
       this.getCurrentAreaInfo(data,true);
 
@@ -179,7 +179,8 @@ export default {
       menuDom.style.top=evt.clientY+'px';
 
       this.dataForTabs.title=data.label;
-      this.dataForTabs.gid=data.gid; 
+      this.dataForTabs.gid=data.gid;
+      this.dataForTabs.planId=data.id;
       switch(data.from_table){
         case 'county' :
         case 'country' :
@@ -188,7 +189,7 @@ export default {
           this.dataForTabs.showType=1;
           break;
         case  'plan' :
-          this.menu=menu.slice(1);
+          this.menu=menu.slice(1);        
           this.dataForTabs.showType=2;
           break;
         case 'spot' :

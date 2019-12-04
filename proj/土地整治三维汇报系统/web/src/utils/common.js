@@ -56,3 +56,13 @@ export function getTemplateStr(option) {
   
   return eval(compile())(data);
 }
+
+export function arr1Dto2D(arr,n){
+  let result=[];  
+  const len=arr.length;
+  const lines=len%n===0?len/3:Math.floor(len/3)+1;
+  for (let i = 0; i < lines; i++) {        
+    result.push(arr.slice(i*n,i*n+n));
+  }
+  return result;
+}

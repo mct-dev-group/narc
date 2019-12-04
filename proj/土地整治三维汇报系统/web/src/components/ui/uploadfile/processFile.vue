@@ -36,6 +36,7 @@
 
 <script>
 import {post} from '@/utils/fetch';
+import {arr1Dto2D} from '@/utils/common';
 
 export default {
   name: 'processFile',
@@ -50,15 +51,8 @@ export default {
   },
   props:[],
   computed:{
-    itmesOfChanges:function(){
-      let result=[];
-      const n=3;
-      const len=this.spotStatusChange.length;
-      const lines=len%n===0?len/3:Math.floor(len/3)+1;
-      for (let i = 0; i < lines; i++) {        
-        result.push(this.spotStatusChange.slice(i*n,i*n+n));
-      }
-      return result;
+    itmesOfChanges:function(){          
+      return arr1Dto2D(this.spotStatusChange,3);
     }
   },
   methods: {
