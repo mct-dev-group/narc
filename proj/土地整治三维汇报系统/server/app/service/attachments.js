@@ -96,6 +96,15 @@ class AttachmentsService extends Service {
   }
 
   // 保存附件
+  /**
+   * save attachment to db
+   * @param {string} file_name attachment file name
+   * @param {string} file_type attachment file type
+   * @param {buffer} bufs file buffer
+   * @param {number} attach_to_id gid on tree table
+   * @param {string} attach_type special tag ,a unique tag can only appear once each attach_to_id
+   * @param {string} DB daatabase name
+   */
   async postAttachment(file_name, file_type, bufs, attach_to_id, attach_type = null, DB) {
     const sequelize = this.app.Sequelize;
     let list = [];
