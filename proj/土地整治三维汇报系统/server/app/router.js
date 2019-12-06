@@ -22,6 +22,7 @@ module.exports = app => {
   );
   router.get('/attachs/query', controller.attachments.query);
   router.get('/attachs/getStatus', controller.attachments.getStatus);
+
   router.post('/attachs/postF1to2', controller.attachments.postF1to2);
   router.post('/attachs/postF2to3', controller.attachments.postF2to3);
   router.post('/attachs/postF3to4', controller.attachments.postF3to4);
@@ -40,4 +41,6 @@ module.exports = app => {
   router.get('/geom/getCurrentAreaInfo/:id/:table/:DB', controller.geom.getCurrentAreaInfo);
   router.get('/geom/setStatus/:id/:status/:DB', controller.geom.setStatus);
   router.get('/geom/getLayer/:x/:y/:DB', controller.geom.getLayer);
+
+  router.get('/plan/getPlansIn/:gid/:DB', controller.plan.getPlansIn);
 };
