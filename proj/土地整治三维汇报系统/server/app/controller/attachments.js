@@ -403,71 +403,107 @@ class AttachmentsController extends Controller {
     return { code: 0, data: result };
   }
 
-  async getF1to2Attach() {
-    return await this.getAttachFmton([ 1, 2 ]);
+  async getF1to2Attach(isAll) {
+    const { pred } = isAll;
+    const res = await this.getAttachFmton([ 1, 2 ], pred);
+    if (pred) return res;
+    this.ctx.body = rb;
   }
 
-  async getF2to3Attach() {
-    return await this.getAttachFmton([ 2, 3 ]);
+  async getF2to3Attach(isAll) {
+    const { pred } = isAll;
+    const res = await this.getAttachFmton([ 2, 3 ], pred);
+    if (pred) return res;
+    this.ctx.body = rb;
   }
 
-  async getF3to4Attach() {
-    return await this.getAttachFmton([ 3, 4 ]);
+  async getF3to4Attach(isAll) {
+    const { pred } = isAll;
+    const res = await this.getAttachFmton([ 3, 4 ], pred);
+    if (pred) return res;
+    this.ctx.body = rb;
   }
 
-  async getF4to5Attach() {
-    return await this.getAttachFmton([ 4, 5 ]);
+  async getF4to5Attach(isAll) {
+    const { pred } = isAll;
+    const res = await this.getAttachFmton([ 4, 5 ], pred);
+    if (pred) return res;
+    this.ctx.body = rb;
   }
 
-  async getF5to6Attach() {
-    return await this.getAttachFmton([ 5, 6 ]);
+  async getF5to6Attach(isAll) {
+    const { pred } = isAll;
+    const res = await this.getAttachFmton([ 5, 6 ], pred);
+    if (pred) return res;
+    this.ctx.body = rb;
   }
 
-  async getF6to7Attach() {
-    return await this.getAttachFmton([ 6, 7 ]);
+  async getF6to7Attach(isAll) {
+    const { pred } = isAll;
+    const res = await this.getAttachFmton([ 6, 7 ], pred);
+    if (pred) return res;
+    this.ctx.body = rb;
   }
 
-  async getAttachFmton([ m, n ]) {
+  async getAttachFmton([ m, n ], isAll) {
     const { ctx, service } = this;
-    const { getFileName, getFileType } = ctx.helper;
+    const helper = ctx.helper;
+    const { getFileName, getFileType } = helper;
     const id = this.ctx.params.id;
     const DB = this.ctx.params.DB;
     const step = `f${m}to${n}`;
+    const res = {};
     try {
       if (m === 2 && n === 3) {
         const { id, DB } = this.ctx.params;
         const attachId = await this.service.attachments.getF2to3(id, DB);
         const attaId = attachId[0].f2to3;
+        const attr = attachId[0].f2to3_1;
         const result = await service.attachments.getAttachmentById(attaId, DB);
         const { file_type, blob_data } = result[0];
         const buffer = Buffer.from(blob_data, 'binary');
         const bufferBase64 = buffer.toString('base64');
         result[0].mime_type = mime.lookup(file_type);
+        result[0].attr = attr;
         result[0].blob_data = bufferBase64;
         result[0].step = `F${m}to${n}`;
-        return result[0];
+        if (isAll) return result[0];
+        rb = helper.getSuccess(result[0]);
+        return;
       }
       const result = await service.attachments.getAttachmentBySetpAndId(step, id, DB);
+      console.log(result);
       const file_full_name = result[0][`${step}_filename`];
+      if (!file_full_name) throw '没有上传文件';
+      const status = result[0].status;
+      const attr = result[0][`${step}_1`];
       const file_name = getFileName(file_full_name);
       const file_type = getFileType(file_full_name);
       const blob_data = result[0][`${step}`]
       const buffer = Buffer.from(blob_data, 'binary');
       const bufferBase64 = buffer.toString('base64');
-      const res = {};
       res.file_name = file_name;
       res.file_type = file_type;
       res.step = `F${m}to${n}`;
+      res.status = status;
+      res.attr = attr;
       res.mime_type = mime.lookup(file_type);
       res.blob_data = bufferBase64;
-      return res;
+      if (isAll) return res;
+      console.log(res);
+      rb = helper.getSuccess(res);
     } catch (error) {
       console.log(error);
-      throw error;
+      if (isAll) {
+        throw error;
+      } else {
+        rb = helper.getFailed(error);
+      }
     }
   }
 
   async getAllFmtonAttach() {
+    const isAll = { pred: true };
     const { ctx, service } = this;
     const helper = ctx.helper;
     const id = this.ctx.params.id;
@@ -478,7 +514,7 @@ class AttachmentsController extends Controller {
       const result = [];
       while (i > 1) {
         const stepFn = `getF${i - 1}to${i}Attach`;
-        const data = await this[stepFn]();
+        const data = await this[stepFn](isAll);
         result.push(data);
         i -= 1;
       }
@@ -487,6 +523,7 @@ class AttachmentsController extends Controller {
       console.log(error);
       rb = helper.getFailed(error);
     } finally {
+      console.log('rb');
       ctx.body = rb;
     }
   }
