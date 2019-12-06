@@ -30,37 +30,37 @@ class PlansService extends Service {
         }
       );
       const country_ids = country_ids_array_agg[0].array_agg;
-
+      if (!country_ids) return [];
       const village_gids_array_agg = await this.app[DB].query(
-        `select array_agg(id) from country_village_tree where parent in (${country_ids.toString()})`,
+        `select array_agg(id) from country_village_tree where parent in (${country_ids.toString()}) and from_table = 'village';`,
         {
           type: sequelize.QueryTypes.SELECT,
         }
       );
       const village_gids = village_gids_array_agg[0].array_agg;
 
-      return await this.app[DB].query(
+      return village_gids ? await this.app[DB].query(
         `select shape_area, status from plan where gid in (${village_gids.toString()})`,
         {
           type: sequelize.QueryTypes.SELECT,
         }
-      );
+      ) : [];
     }
     // 村
     if (table_name === 'village') {
       const village_gids_array_agg = await this.app[DB].query(
-        `select array_agg(id) from country_village_tree where parent = ${gid};`,
+        `select array_agg(id) from country_village_tree where parent = ${gid} and from_table = 'village';`,
         {
           type: sequelize.QueryTypes.SELECT,
         }
       );
       const village_gids = village_gids_array_agg[0].array_agg;
-      return await this.app[DB].query(
+      return village_gids ? await this.app[DB].query(
         `select shape_area, status from plan where gid in (${village_gids.toString()})`,
         {
           type: sequelize.QueryTypes.SELECT,
         }
-      );
+      ) : [];
     }
   }
 }
