@@ -11,6 +11,7 @@ class PlansController extends Controller {
       const result = await service.plan.getPlansIn(gid, DB);
       rb = helper.getSuccess(result);
     } catch (error) {
+      console.log(error)
       rb = helper.getFailed(error);
     } finally {
       ctx.body = rb;
