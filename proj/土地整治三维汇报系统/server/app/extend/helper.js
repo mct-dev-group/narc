@@ -43,20 +43,37 @@ module.exports = {
     const isFolder = files.map(f => fs.lstatSync(path.join(unzipOutPath, f)).isDirectory()).every(Boolean);
     return isFolder ? unzipOutPath + '/' + files[0] : unzipOutPath;
   },
+  /**
+   * 生成六个字母长度的随机字符串
+   */
   randomString() {
     return Math.random().toString(36).substr(7);
   },
+  /**
+   * 生成九位随机负数
+   */
   randomNegNumber() {
     return Number.parseInt(-1 + Math.random().toString().substr(10));
   },
   delDir,
+  /**
+   * 服务器文件夹目录
+   */
   getServerRootPath() {
     return ServerRootPath;
   },
+  /**
+   * 
+   * @param {string} filename full file name 
+   */
   getFileType(filename) {
     const arr = filename.split('.');
     return arr.pop();
   },
+  /**
+   * 
+   * @param {string} filename full file name
+   */
   getFileName(filename) {
     const arr = filename.split('.');
     arr.pop();
@@ -64,6 +81,10 @@ module.exports = {
   },
 };
 
+/**
+ * 
+ * @param {string} path 递归删除的目录路径
+ */
 function delDir(path) {
   if (fs.existsSync(path)) {
     fs.readdirSync(path).forEach(function(file) {
