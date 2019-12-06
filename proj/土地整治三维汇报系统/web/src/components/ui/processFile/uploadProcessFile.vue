@@ -1,5 +1,5 @@
 <template>
-  <div class="processFile">
+  <div class="uploadProcessFile">
     <el-row v-for="(item,index) of itmesOfChanges" :key='index'>
       <el-col :span="8" v-for="(val,i) of item" :key='i'>
         <el-card shadow='hover'>          
@@ -39,17 +39,17 @@ import {post} from '@/utils/fetch';
 import {arr1Dto2D} from '@/utils/common';
 
 export default {
-  name: 'processFile',
+  name: 'uploadProcessFile',
   data(){
     return {
       dialogVisible:false,
       fileMap:new Map(),      
       spotStatusChange:[...config.spotStatusChange],
       errors:[],
-      DB:''
+      DB:this.$store.state.db
     }
   },
-  props:[],
+  props:['gid'],
   computed:{
     itmesOfChanges:function(){          
       return arr1Dto2D(this.spotStatusChange,3);
@@ -82,7 +82,9 @@ export default {
         const file_name = fileInfo.join(".");
         const fd = new FormData();
         fd.append("file_name", file_name);
-        fd.append("file_type", file_type);        
+        fd.append("file_type", file_type);
+        fd.append("attach_to_id", this.gid);
+        fd.append("attach_type", type);
         fd.append("DB", this.DB);
         fd.append(type, file);
         post("/attachs/post"+type,fd).then(res=>{          
@@ -104,14 +106,11 @@ export default {
       }
     },
   },
-  mounted(){
-    this.DB=this.$store.state.db;
-  },
 }
 </script>
 
 <style lang="scss" scoped>
-.processFile{
+.uploadProcessFile{
   box-sizing: border-box;
   height: 100%;
   overflow-x: hidden;

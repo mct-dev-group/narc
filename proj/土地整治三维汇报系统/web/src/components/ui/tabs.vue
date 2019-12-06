@@ -12,17 +12,17 @@
         ref='activeTab'
         @tab-click='handleClick'
       >
-        <el-tab-pane label="统计信息" name='1' v-if='dataForTabs.showType===1'>
+        <el-tab-pane label="统计信息" name='1' v-if='dataForTabs.showType===0||dataForTabs.showType===1'>
           <checkChart v-loading='chartLoading' :chartData='chartData' ref='checkChart' />
         </el-tab-pane>
-        <el-tab-pane label="附件查看" name='2' v-if='dataForTabs.showType!==3'>
-          <checkFile v-loading='checkLoading' ref='checkFile' :gid='dataForTabs.gid' :planId='dataForTabs.planId' :showType='dataForTabs.showType' :files='files' @update:checkLoading='checkLoading=false'/>
+        <el-tab-pane label="附件" name='2' v-if='dataForTabs.showType!==3'>
+          <attachments  ref='attachments' :gid='dataForTabs.gid' :files='files'/>
         </el-tab-pane>
-        <el-tab-pane label="附件上传" name='3' v-if='dataForTabs.showType!==3'>
-          <uploadFile ref='uploadFile' :gid='dataForTabs.gid' :showType='dataForTabs.showType'/>
-        </el-tab-pane>
-        <el-tab-pane label="查看详情" name='4'>
+        <el-tab-pane label="查看详情" name='3' v-if='dataForTabs.showType!==0'>
           <checkDetail ref='checkDetail' :details.sync='dataForTabs.details' :showType='dataForTabs.showType' :closeTabsBox='closeTabsBox'/>
+        </el-tab-pane>
+        <el-tab-pane label="流程文件" name='4' v-if='dataForTabs.showType===0'>          
+          <processFile ref='processFile' :gid='dataForTabs.gid'/>
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -30,10 +30,10 @@
 </template>
 
 <script>
-import  checkFile from './checkFile.vue';
 import  checkChart from './checkChart.vue';
-import  uploadFile from './uploadFile.vue';
+import  attachments from './attachments/attachments';
 import  checkDetail from './checkDetail.vue';
+import  processFile from './processFile/processFile';
 import {get} from '@/utils/fetch';
 export default {
   name: 'tabs',
@@ -50,11 +50,11 @@ export default {
     }
   },
   props:['activeTab','dataForTabs'],
-  components:{
-    checkFile,
+  components:{    
     checkChart,
-    uploadFile,
-    checkDetail
+    attachments, 
+    checkDetail,    
+    processFile
   },
   mounted(){
     this.DB=this.$store.state.db;
@@ -88,41 +88,38 @@ export default {
           });
 
           break;
-        //附件查看
-        case '2':
-          get("/attachs/getAttachmentListById/" +this.dataForTabs.gid+'/'+this.DB).then(res=>{
-            this.files=res.data;
-            // this.$refs.checkFile.activeTab=this.dataForTabs.showType===1?'1':'2';
-            this.$refs.checkFile.activeTab='1';
-            this.checkLoading=true;
-          });
+        //附件
+        case '2':          
+          this.$refs.attachments.activeTab='1';
           break;
-        //附件上传
-        case '3':
-          this.$refs.uploadFile.activeTab=this.dataForTabs.showType===1?'1':'2';
+        //流程文件
+        case '4':
+          this.$refs.processFile.activeTab='1';
           break;
       };
       switch(oName){
+        //统计信息
         case '1':
           this.$refs.checkChart.clearChart();
           break;
+        //附件
         case '2':
-          this.$refs.checkFile.activeTab='0';
+          this.$refs.attachments.activeTab='0';
           break;
-        case '3':
-          // this.$refs.uploadFile.activeTab='0';
-          break;
+        //流程文件
+        case '4':
+          this.$refs.processFile.activeTab='0';
+          break;        
       }
     },
-    closeTabsBox(){
-      console.log('called');
+    closeTabsBox(){      
       this.$emit('update:showTabs');
       this.$emit('update:activeTab');
       this.$emit('update:lastLayer');
-      this.$refs.uploadFile&&this.$refs.uploadFile.clear();
-      this.$refs.checkFile&&this.$refs.checkFile.clearFile();
-      this.$refs.checkDetail.clear();
       this.$refs.checkChart&&this.$refs.checkChart.clearChart();
+      this.$refs.attachments&&this.$refs.attachments.clear();
+      this.$refs.checkDetail&&this.$refs.checkDetail.clear();
+      this.$refs.processFile&&this.$refs.processFile.clear();
     },
     handleClick(tab){
       // console.log(tab);

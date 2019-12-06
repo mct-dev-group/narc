@@ -53,18 +53,18 @@ const menu=[
   },
   {
     id:'2',
-    icon:'fa fa-file',
-    content:'附件查看'
+    icon:'fa fa-file-zip-o ',
+    content:'附件'
   },
   {
     id:'3',
-    icon:'el-icon-upload',
-    content:'附件上传'
+    icon:'fa fa-list',
+    content:'查看详情'
   },
   {
     id:'4',
     icon:'fa fa-list',
-    content:'查看详情'
+    content:'流程文件'
   }
 ];
 
@@ -141,24 +141,28 @@ export default {
       this.dataForTabs.gid=data.gid;       
       switch(data.from_table){
         case 'county' :
+          let menuCopy=menu.slice();
+          menuCopy.splice(2,1);
+          this.menu=menuCopy;
+          this.dataForTabs.showType=0;
         case 'country' :
         case 'village' :
-          this.menu=menu.slice();
+          this.menu=menu.slice(0,3);
           this.dataForTabs.showType=1;
           break;
         case  'plan' :
-          this.menu=menu.slice(1);
+          this.menu=menu.slice(1,3);
           this.dataForTabs.showType=2;
           break;
         case 'spot' :
-          this.menu=[menu[3]];
+          this.menu=[menu[2]];
           this.dataForTabs.showType=3;
           break;
       }
       let leafNodeList=getLeafNodeList(data);
       let plan=leafNodeList.filter(v=>v.from_table==='plan');
       this.dataForTabs.plan=plan;
-      this.menuMousedown('4');
+      this.menuMousedown('3');
     },
     clickRow (data,node) {
       if(!data.from_table) return;
@@ -183,20 +187,24 @@ export default {
       this.dataForTabs.planId=data.id;
       switch(data.from_table){
         case 'county' :
+          let menuCopy=menu.slice();
+          menuCopy.splice(2,1);
+          this.menu=menuCopy;
+          this.dataForTabs.showType=0;
+          break;
         case 'country' :
         case 'village' :
-          this.menu=menu.slice();
+          this.menu=menu.slice(0,3);
           this.dataForTabs.showType=1;
           break;
         case  'plan' :
-          this.menu=menu.slice(1);        
+          this.menu=menu.slice(1,3);
           this.dataForTabs.showType=2;
           break;
         case 'spot' :
-          this.menu=[menu[3]];
+          this.menu=[menu[2]];
           this.dataForTabs.showType=3;
           break;
-
       }
       let leafNodeList=getLeafNodeList(data);
       let plan=leafNodeList.filter(v=>v.from_table==='plan');

@@ -1,73 +1,51 @@
 <template>
   <div class="checkDetail">    
     <el-steps finish-status="success" align-center :active="status===spotStatus.length?status:(status-1)" v-if="showType===2">
-      <el-step v-for='(item,index) of spotStatus' :key='index'>
-        <div v-if='index<(spotStatus.length-1)&&index===(status-1)' slot="title" @click="showUploadDialog">{{item[1]}}</div>
-        <div v-else slot="title">{{item[1]}}</div>
-        <div v-if='index<(spotStatus.length-1)&&index===(status-1)' slot="description" @click="showUploadDialog">点击上传</div>        
+      <el-step v-for='(item,index) of spotStatus' :key='index'>              
+        <div v-if='index>0&&index<spotStatus.length&&index<=(status-1)' slot="title" @click="checkExtendProps">{{item[1]}}</div>
+        <div v-else slot="title">{{item[1]}}</div>        
+        <div v-if="index>0&&index<spotStatus.length&&index<=(status-1)" slot="description" @click="checkExtendProps">点击查看</div>                
       </el-step>
     </el-steps>
-    <div class="propsContainer" v-bind:class="{'height-240': showType===2}">
-      <div v-for='(val,key) in details' :key='key' v-if='key!=="geom"'>
-        <span>{{key}}：</span>
-        <div class="prop" >{{key==='status'?spotStatusMap.get(val):val}}</div>
-      </div>
-    </div>
-    <el-dialog
-      title="成果文件上传"
-      :visible.sync="dialogVisible"      
-      :close-on-click-modal='false'
-      :before-close="handleBeforeClose"
-      width="480px"
-      center
-      append-to-body
-    >
-      <el-dialog
-        title="错误信息"
-        :visible.sync="innerDialog"
-        append-to-body
-        center
+    <div>
+      <el-table      
+        style="width: 100%"
+        :data="props"
+        size='small'
       >
-        <div v-for="(err,i) of errors" :key='i' class="errorItem">
-          <div>{{err.error}}</div>
-        </div>
-      </el-dialog>      
-      <div class="uploadCard">
-        <el-row>
-          <el-col :span='6'>
-            <div v-if='spotStatusMapping.length>0'>
-              <div v-for="(item,index) of spotStatusMapping" :key="index">
-                <el-radio v-model="radio" :label="item">{{spotStatusChange.has(item)?spotStatusChange.get(item):'名称未定义'}}</el-radio>
-              </div>
-            </div>
-            <div v-else class="error-text">
-              无对应上传接口！请检查配置。
-            </div>
-          </el-col>
-          <el-col :span='18'>
-            <el-upload
-              ref='upload'
-              action
-              accept='application/zip'
-              :limit='1'
-              :auto-upload='false'
-              :on-change='handleChange'
-              :on-exceed='handleExceed'
-              :on-remove='handleRemove'
-            >
-              <el-button type="info" icon='el-icon-plus' slot="trigger">添加文件</el-button>
-              <el-button type="primary" icon='el-icon-upload' class="margin-left-10" @click="handleUpload">上传至服务器</el-button>
-              <div slot="tip" class="el-upload__tip">请上传.zip文件。</div>
-            </el-upload>
-          </el-col>
-        </el-row>
-      </div>      
-    </el-dialog>
+        <el-table-column
+          align='center'
+          prop="status"
+          label="状态"
+          width="180">
+        </el-table-column>
+        <el-table-column
+          align='center'
+          label="操作"
+          fixed="right"
+        >
+          <el-button type="text">查看</el-button>
+          
+        </el-table-column>
+      </el-table>
+    </div>
+    <div class="propsContainer" v-bind:class="{'height-150': showType===2}" v-if='basicProps.length>0'>
+      <el-row  v-for="(item,index) of basicProps" :key='index'>
+        <el-col :span="8" v-for="(prop,i) of item" :key='i'>
+          <el-row>
+            <el-col class="text-right" :span='12'><span :title="prop[0]">{{prop[0]}}&nbsp;：</span></el-col>
+            <el-col :span='12'><span :title="(prop[0]==='status'?spotStatusMap.get(prop[1]):prop[1])||'暂无数据'">{{(prop[0]==='status'?spotStatusMap.get(prop[1]):prop[1])||'暂无数据'}}</span></el-col>
+          </el-row>
+        </el-col>        
+      </el-row>
+    </div>
+    
   </div>
 </template>
 
 <script>
 import {post} from '@/utils/fetch';
+import {arr1Dto2D} from '@/utils/common';
 import evenBus from '@/utils/event_bus';
 import { setStatus } from '@/api/api';
 
@@ -77,13 +55,15 @@ export default {
     return {
       status:this.details?this.details.status:1,
       spotStatusMap:config.spotStatus,
-      spotStatusChange:config.spotStatusChange,
-      dialogVisible:false,
+      spotStatusChange:config.spotStatusChange,      
       innerDialog:false,
       uploadFile:[],
       radio:'',
       errors:[],
-      DB:''
+      props:[{
+        status:1
+      }],
+      DB:this.$store.state.db
     }
   },  
   props:['details','showType','closeTabsBox'],
@@ -101,12 +81,24 @@ export default {
         result=[];
       }
       return result;
+    },
+    basicProps:function(){
+      if(this.details){        
+        const filteredData=Object.entries(this.details).filter(f=>{
+          let [key]=f;          
+          let regExpArr=[...config.spotStatusChange.keys()].filter(v=>new RegExp('^'+v,'ig').test(key));          
+          return key!=='geom'&&regExpArr.length<1;
+        });        
+        return arr1Dto2D(filteredData,3);
+      }else{
+        return [];
+      }
     }
   },
   watch:{
     details:function(){
       if(this.details){
-        this.status=this.details.status;
+        this.status=this.details.status;       
       }      
     }
   },
@@ -118,69 +110,9 @@ export default {
       this.radio='';
       this.errors=[];
     },
-    showUploadDialog(){      
-      this.dialogVisible=true;
-    },
-    handleChange(file,fileList){
-      if(file.raw.type==='application/zip'){
-        this.uploadFile.push(file.raw);
-      }else{
-        this.$message.error('请选择文件格式为.zip的文件上传！');        
-        this.$refs.upload.clearFiles();
-      }
-    },
-    handleExceed(file,fileList){
-      this.$message.error('只能选择一个文件上传！');
-    },
-    handleRemove(file,fileList){
-      this.uploadFile.pop();
-    },
-    handleUpload(){
-      if(this.uploadFile.length<1){
-        this.$message.error(`文件为空！请选择文件后上传！`);
-        return;
-      }
-      if(this.radio===''){
-        this.$message.error(`请在左侧选择上传类型!`);
-        return;
-      }
-      if(this.uploadFile.length>0){
-        const type=this.radio;
-        let file=this.uploadFile.pop();
-        const fileInfo = file.name.split(".");
-        const file_type = fileInfo.pop();
-        const file_name = fileInfo.join(".");
-        const fd = new FormData();
-        fd.append("file_name", file_name);
-        fd.append("file_type", file_type);        
-        fd.append("DB", this.DB);
-        fd.append(type, file);
-        post("/attachs/post"+type,fd).then(res=>{
-          console.log(res);
-          if(res.code===1){
-            this.$message.success(`文件上传成功！`);
-            this.dialogVisible=false;
-            this.closeTabsBox();
-          }else{
-            this.errors=res.data;
-            this.innerDialog=true;
-          }
-        }).catch(error=>{
-          console.error(error);
-        }).finally(()=>{
-          this.$refs.upload.clearFiles();
-        });
-      }else{
-        
-      }
-    },
-    handleBeforeClose(done){
-      this.$refs.upload.clearFiles();
-      done();
-    },      
-  },
-  mounted(){
-    this.DB=this.$store.state.db;
+    checkExtendProps(){
+      console.log('checkExtendProps');
+    },                
   },
 }
 
@@ -197,56 +129,49 @@ div{
   color: #F56C6C;
 }
 .checkDetail{    
-  height: 320px;
-  margin: 10px;  
+  height: 340px;
+  padding:5px  10px 0 10px;  
   overflow: hidden;
 
   >.el-steps{
-    width:100%;
-    margin-bottom:1rem;
+    width:100%;    
     user-select: none;
 
-    /deep/.el-step__title.is-process,/deep/.el-step__description{
+    /deep/.el-step__title.is-process,/deep/.el-step__description,/deep/.el-step__title.is-success{
       cursor: pointer;
     }    
   }
 
-  .height-240{
-    height: 240px;
+  .el-table{
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  .height-150{
+    height: 150px;
   }
 
   >.propsContainer{
     width:100%;    
     overflow-x: hidden;
-    overflow-y: auto;    
-    display: flex;    
-    flex-wrap: wrap;
-  
-
-    >div>span{
-      width: 100px;      
-      line-height: 40px;
-      display: inline-block;
-      padding-right:5px;
-      font-size: 18px;
-      text-align:right;      
+    overflow-y: auto;
+    margin-top: 10px; 
+    
+    .el-row~.el-row {
+      margin-top: 10px;    
     }
-    >div>div.prop{      
-      display: inline-block;
-      height:40px;
-      line-height: 20px;
-      width: 150px;      
-      padding:8px;
-      vertical-align: middle;
+    .el-col{
+      padding:0 5px;
+      height: 25px;
+      line-height: 25px;
+      overflow-x: hidden;
+      white-space: nowrap;    
+      text-overflow: ellipsis;
+    }
 
+    .text-right{
+      text-align: right;
     }
   }  
-}
-.uploadCard{  
-  min-height: 100px;
-}
-.errorItem{
-  margin-bottom:10px;
-  font-size: 16px;
 }
 </style>

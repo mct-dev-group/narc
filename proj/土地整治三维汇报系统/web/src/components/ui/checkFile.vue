@@ -11,9 +11,9 @@
           <el-row v-for="(item,index) of processFiles" :key='index'>
             <el-col v-for="(val,i) of item" :key='i' :span="8">
               <el-card shadow='hover' :body-style='{padding:"5px"}'>
-                <p>{{spotStatusChange.get(val.step)}}</p>
-                <div @click="handleProcessFileClick(index,i)">
-                  <a class="fileLink"><i class='fa fa-file-zip-o'></i>{{val.file_name}}.{{val.file_type}}</a> 
+                <p>{{spotStatusChange.get(val.step||val.attach_type)}}</p>
+                <div @click="handleProcessFileClick(index,i)" :title="val.file_name+'.'+val.file_type">
+                  <a class="fileLink"><i :class='val.icon'></i>{{val.file_name}}.{{val.file_type}}</a> 
                 </div>
                 
               </el-card>
@@ -65,29 +65,9 @@ export default {
   computed:{
     otherFiles:function(){
       if(this.files){
-        let files=this.files.filter(file=>file.attach_type!=='zzq_img'&&file.attach_type!=='zzh_img');
+        let files=this.files.filter(file=>![...config.spotStatusChange.keys()].includes(file.attach_type));
         files.forEach(file=>{
-          switch(file.file_type){
-            case 'jpg':
-            case 'png':
-            case 'gif':
-              file.icon='fa fa-file-image-o';
-              break;
-            case 'xls':
-            case 'xlsx':
-              file.icon='fa fa-file-excel-o';
-              break;
-            case 'doc':
-            case 'docx':
-              file.icon='fa fa-file-word-o';
-              break;
-            case 'zip':
-            case 'rar':
-              file.icon='fa fa-file-archive-o';
-              break;
-            default :
-              file.icon='fa fa-file-o';
-          }
+          file.icon=getIcon(file.file_type);
         });
         return files;
       }
@@ -104,6 +84,9 @@ export default {
         if(this.showType===2){
           get('/attachs/getAllFmtonAttach/'+this.planId+'/'+this.DB).then(res=>{
             let data=res.data;
+            data.forEach(f=>{
+              f.icon=getIcon(f.file_type);
+            });
             this.processFiles=arr1Dto2D(data,3);
             this.$emit('update:checkLoading');
           }).catch(error=>{
@@ -111,14 +94,21 @@ export default {
           }).finally(()=>{
 
           });
-        }else{
-          this.$emit('update:checkLoading');
-        }                
+        }else{          
+          console.log(this.files);
+          const data=this.files.filter((file)=>[...config.spotStatusChange.keys()].includes(file.attach_type));
+          data.forEach(f=>{
+            f.icon='fa fa-file-zip-o';
+          });
+          this.processFiles=arr1Dto2D(data,3);
+          this.$emit('update:checkLoading');         
+        }
       }else if(aName==='2'){
         this.$emit('update:checkLoading');
       }
     },
     handleProcessFileClick(m,n){
+      // if()
       let file=this.processFiles[m][n];
       const bolbUrl=`data:${file.mime_type};base64,` + file.blob_data;
       openInNewtab(bolbUrl);
@@ -147,6 +137,34 @@ function openInNewtab(dataURL) {
   x.document.write(iframe);
   x.document.body.style.margin=0;
   x.document.close();
+}
+function getIcon(type){
+  let result='fa fa-';
+  switch(type){
+    case 'jpg':
+    case 'png':
+    case 'gif':
+      result+='file-image-o';
+      break;
+    case 'xls':
+    case 'xlsx':
+      result+='file-excel-o';
+      break;
+    case 'doc':
+    case 'docx':
+      result+='file-word-o';
+      break;
+    case 'zip':
+    case 'rar':
+      result+='file-archive-o';
+      break;
+    case 'txt':
+      result+='file-text-o';
+      break;
+    default :
+      result+='file-o';
+  }
+  return result;
 }
 </script>
 
@@ -208,6 +226,7 @@ function openInNewtab(dataURL) {
     text-decoration: none;
     color: #606266;
     display: block;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 

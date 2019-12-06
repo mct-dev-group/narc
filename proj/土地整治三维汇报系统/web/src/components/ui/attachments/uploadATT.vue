@@ -1,7 +1,7 @@
 <template>
-  <div class="uploadOther">
+  <div class="uploadATT">
     <el-upload
-      ref="uploadOther"
+      ref="uploadATT"
       action
       multiple
       :auto-upload="false"
@@ -18,7 +18,7 @@
 <script>
 import {post} from '@/utils/fetch';
 export default {
-  name: 'uploadOther',
+  name: 'uploadATT',
   data () {
     return {
       fileList:new Map(),
@@ -86,7 +86,7 @@ export default {
       });
     },
     clear(){
-      this.$refs.uploadOther.clearFiles();
+      this.$refs.uploadATT.clearFiles();
       this.fileList.clear();
     }
   }
@@ -94,5 +94,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+.uploadATT{
+  height: 100%;
+}
 </style>
