@@ -41,6 +41,8 @@ module.exports = app => {
   router.get('/geom/getCurrentAreaInfo/:id/:table/:DB', controller.geom.getCurrentAreaInfo);
   router.get('/geom/setStatus/:id/:status/:DB', controller.geom.setStatus);
   router.get('/geom/getLayer/:x/:y/:DB', controller.geom.getLayer);
+  router.get('/geom/updateStatusForCountry/:DB', controller.geom.updateStatusForCountry);
+  router.get('/geom/getAllCountryStatusWeight/:DB', controller.geom.getAllCountryStatusWeight);
 
   router.get('/plan/getPlansIn/:gid/:DB', controller.plan.getPlansIn);
 };

@@ -79,6 +79,34 @@ module.exports = {
     arr.pop();
     return arr.join('.');
   },
+  /**
+   * 计算权重
+   */
+  calculateStatusWeght (statusWeight, data) {
+      const statusKeys=[...statusWeight.keys()];
+      const total=data.map(d=>d.shape_area*1).reduce((a,b)=>a+b,0);
+      const sumMap=new Map(
+        statusKeys.map(s=>{                  
+          return [s,0];
+        })
+      );
+      data.forEach((d)=>{
+        const s=d.status;
+        let arr=statusKeys.slice();
+        arr.sort((a,b)=>a-b);
+        if(s>arr[0]){                  
+          for (const [k,v] of sumMap.entries()) {
+            if(k<s||k===s){                        
+              sumMap.set(k,v+d.shape_area*1);
+            }
+          }
+        }else{                  
+          let v=sumMap.get(arr[0]);
+          sumMap.set(arr[0],v+d.shape_area*1)
+        }                
+      });              
+      return {total, sumMap}
+  }
 };
 
 /**

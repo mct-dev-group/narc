@@ -54,9 +54,9 @@ module.exports = appInfo => {
         database: 'qibin_db',
         username: 'postgres',
         password: 'admin',
-        logging(...args){
+        // logging(...args){
 
-        },
+        // },
         define: {
           timestamps: false,
         },
@@ -90,6 +90,15 @@ module.exports = appInfo => {
     ]
   }
 
+  config.statusWeight=new Map([
+    [1,1/7],
+    [2,1/7],
+    [3,1/7],
+    [4,1/7],
+    [5,1/7],
+    [6,1/7],
+    [7,1/7],
+  ]);
   // add your user config here
   const userConfig = {
     // myAppName: 'egg',
