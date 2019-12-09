@@ -72,12 +72,3 @@ config.spotStatusChange=new Map([
   ['F5to6','变更确认表'],
   ['F6to7','待定'],
 ]);
-//图斑转态与可用状态变更对应关系
-config.spotStatusMapping=new Map([
-  [1,['F1to2']],
-  [2,['F1to2','F2to3']],
-  [3,['F2to3','F3to4']],
-  [4,['F3to4','F4to5']],
-  [5,['F4to5','F5to6']],
-  [6,['F5to6','F6to7']],
-]);

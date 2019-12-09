@@ -63,7 +63,7 @@ const menu=[
   },
   {
     id:'4',
-    icon:'fa fa-list',
+    icon:'fa fa-upload',
     content:'流程文件'
   }
 ];

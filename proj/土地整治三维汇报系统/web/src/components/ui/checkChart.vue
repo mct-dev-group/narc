@@ -1,38 +1,38 @@
 <template>
   <div class="checkChart">
-      <div class='progress'>
-        <el-row>
-          <el-col :span='4'>
-            <span style="font-weight:bold">总体进度&nbsp;:</span>
-          </el-col>
-          <el-col :span='16'>
-            <div class='progress-line'>
-              <el-progress :text-inside="true" :stroke-width="26" :percentage="percentage" ></el-progress>              
-            </div>
-          </el-col>
-          <el-col :span='4' style="text-align:right;">
-            <el-popover
-              placement='bottom-end'
-              width="200"
-              trigger="hover"
-              title="计算规则"
-              content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。"
-            >
-              <span slot="reference" class="popover-span">计算规则<i class="el-icon-info el-icon--right"></i></span>
-            </el-popover>
-          </el-col>
-        </el-row>
-      </div>
-      <div class="chart">
-        <el-table 
-          :data="tableData"
-          size='small'               
-          style="width:580px;margin:0 auto;"
-        >
-          <el-table-column v-for="(v,i) of tableColumn" :key='i' :prop="v[0]+''" :label='v[1]'></el-table-column>            
-        </el-table>
-        <div id="planChart" ref="planChart" @click="handleClick"></div>
-      </div>
+    <div class='progress'>
+      <el-row>
+        <el-col :span='4'>
+          <span style="font-weight:bold">总体进度&nbsp;:</span>
+        </el-col>
+        <el-col :span='16'>
+          <div class='progress-line'>
+            <el-progress :text-inside="true" :stroke-width="26" :percentage="percentage" ></el-progress>              
+          </div>
+        </el-col>
+        <el-col :span='4' style="text-align:right;">
+          <el-popover
+            placement='bottom-end'
+            width="200"
+            trigger="hover"
+            title="计算规则"
+            content="总体进度=各个阶段百分比*权重之和。"
+          >
+            <span slot="reference" class="popover-span">计算规则<i class="el-icon-info el-icon--right"></i></span>
+          </el-popover>
+        </el-col>
+      </el-row>
+    </div>
+    <div class="chart">
+      <el-table 
+        :data="tableData"
+        size='small'               
+        style="width:580px;margin:0 auto;"
+      >
+        <el-table-column v-for="(v,i) of tableColumn" :key='i' :prop="v[0]+''" :label='v[1]'></el-table-column>            
+      </el-table>
+      <div id="planChart" ref="planChart" @click="handleClick"></div>
+    </div>
       
   </div>
 </template>
@@ -90,15 +90,17 @@ export default {
     draw(){
       const th=this;
       this.planChart = this.$echarts.init(this.$refs.planChart);
-
-      let pieAreaSeriesData=[...this.spotStatus].map(s=>{
+      const spotStatus=[...this.spotStatus];
+      const sumMap=this.chartData.sumMap;
+      let pieAreaSeriesData=spotStatus.map(s=>{
         let [k,v]=s;
-        return {value:this.chartData.sumMap.get(k),name:v}
+        const value=sumMap?sumMap.get(k):0;
+        return {value:value,name:v}
       });
-      let barAreaSeries=[...this.spotStatus].map(s=>{
+      let barAreaSeries=spotStatus.map(s=>{
         let [k,v]=s;
-        let data= new Array(this.spotStatus.size).fill(0);
-        data[k-1]=this.chartData.sumMap.get(k);
+        let data= new Array(spotStatus.length).fill(0);
+        data[k-1]=sumMap?sumMap.get(k):0;
         return {
           name: v, 
           type: 'bar',

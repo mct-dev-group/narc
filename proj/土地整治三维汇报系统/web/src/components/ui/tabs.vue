@@ -13,7 +13,7 @@
         @tab-click='handleClick'
       >
         <el-tab-pane label="统计信息" name='1' v-if='dataForTabs.showType===0||dataForTabs.showType===1'>
-          <checkChart v-loading='chartLoading' :chartData='chartData' ref='checkChart' />
+          <checkChart v-loading='chartLoading' :chartData='chartData' ref='checkChart' />          
         </el-tab-pane>
         <el-tab-pane label="附件" name='2' v-if='dataForTabs.showType!==3'>
           <attachments  ref='attachments' :gid='dataForTabs.gid' :files='files'/>
@@ -45,7 +45,7 @@ export default {
       },
       checkLoading:false,
       chartLoading:false,
-      files:'',
+      files:'',      
       DB:this.$store.state.db
     }
   },
@@ -63,37 +63,41 @@ export default {
         case '1':
           this.chartLoading=true;
         
-          get('/plan/getPlansIn/'+this.dataForTabs.gid+'/'+this.DB).then(res=>{
-            // console.log(res);
+          get('/plan/getPlansIn/'+this.dataForTabs.gid+'/'+this.DB).then(res=>{            
             if(res.code===1){
               this.chartLoading=false;
-
               let data=res.data;
-              const statusKeys=[...config.spotStatus.keys()];
-              const total=data.map(d=>d.shape_area*1).reduce((a,b)=>a+b,0);
-              const sumMap=new Map(
-                statusKeys.map(s=>{                  
-                  return [s,0];
-                })
-              );
-              data.forEach((d)=>{
-                const s=d.status;
-                let arr=statusKeys.slice();
-                arr.sort((a,b)=>a-b);
-                if(s>arr[0]){                  
-                  for (const [k,v] of sumMap.entries()) {
-                    if(k<s||k===s){                        
-                      sumMap.set(k,v+d.shape_area*1);
+              if(data.length>0){                
+                const statusKeys=[...config.spotStatus.keys()];
+                const total=data.map(d=>d.shape_area*1).reduce((a,b)=>a+b,0);
+                const sumMap=new Map(
+                  statusKeys.map(s=>{
+                    return [s,0];
+                  })
+                );
+                data.forEach((d)=>{
+                  const s=d.status;
+                  let arr=statusKeys.slice();
+                  arr.sort((a,b)=>a-b);
+                  if(s>arr[0]){
+                    for (const [k,v] of sumMap.entries()) {
+                      if(k<s||k===s){                        
+                        sumMap.set(k,v+d.shape_area*1);
+                      }
                     }
-                  }
-                }else{                  
-                  let v=sumMap.get(arr[0]);
-                  sumMap.set(arr[0],v+d.shape_area*1)
-                }                
-              });              
-              this.chartData.total=total;
-              this.chartData.sumMap=sumMap;
-              this.$refs.checkChart.draw();              
+                  }else{                  
+                    let v=sumMap.get(arr[0]);
+                    sumMap.set(arr[0],v+d.shape_area*1)
+                  }                
+                });              
+                this.chartData.total=total;
+                this.chartData.sumMap=sumMap;
+                this.$refs.checkChart.draw(); 
+              }else{
+                this.chartData.total=0;
+                this.chartData.sumMap=null;
+                this.$refs.checkChart.draw(); 
+              }                                        
             }
           }).catch(error=>{
             console.log(error);
@@ -159,9 +163,6 @@ export default {
     right: 20px;
     color:#303133;
     font-size:16px;
-  }
-  .el-icon-close{
-
   }
 
   .title{
