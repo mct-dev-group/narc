@@ -90,7 +90,7 @@ export default {
       },
       // 高亮颜色
       lightColor: '#189e08',
-      DB:'',
+      DB:this.$store.state.db,
       lastLayer:'',
     }
   },
@@ -208,7 +208,7 @@ export default {
       }
       let leafNodeList=getLeafNodeList(data);
       let plan=leafNodeList.filter(v=>v.from_table==='plan');
-      this.dataForTabs.plan=plan;
+      this.dataForTabs.plan=plan;      
     },
 
     menuMousedown(id){
@@ -277,8 +277,7 @@ export default {
 
     },    
   },
-  mounted(){
-    this.DB=this.$store.state.db;
+  mounted(){    
     const th=this;
     document.body.addEventListener('mousedown',function(evt){
       th.$store.commit('setShowMenu', false);

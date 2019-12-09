@@ -41,12 +41,12 @@ export default {
     return {
       chartData:{
         total:0,
-        statusMap:null
+        sumMap:null
       },
       checkLoading:false,
       chartLoading:false,
       files:'',
-      DB:''
+      DB:this.$store.state.db
     }
   },
   props:['activeTab','dataForTabs'],
@@ -56,37 +56,48 @@ export default {
     checkDetail,    
     processFile
   },
-  mounted(){
-    this.DB=this.$store.state.db;
-  },
   methods: {
     handle(aName,oName){
       switch(aName){
         //统计信息
         case '1':
           this.chartLoading=true;
-          const plan=this.dataForTabs.plan;
-          this.chartData.total=plan.length;
+        
+          get('/plan/getPlansIn/'+this.dataForTabs.gid+'/'+this.DB).then(res=>{
+            // console.log(res);
+            if(res.code===1){
+              this.chartLoading=false;
 
-          let promises=plan.map(v=>get('/attachs/query',{"sql":"select p.status,p.shape_area from plan p where p.gid="+v.id, "DB":this.DB}));
-          Promise.all(promises).then(res=>{
-            const statusArr=res.map(s=>({status:s.data[0].status,area:s.data[0].shape_area*1}));
-            let statusMap=new Map();
-            //状态            
-            for (const v of config.spotStatus.keys()) {
-              let sArr=statusArr.filter(s=>s.status===v);
-              statusMap.set(v,{
-                count:sArr.length,
-                area:sArr.reduce((accumulator, currentValue) => accumulator + currentValue.area,0)
-              });
+              let data=res.data;
+              const statusKeys=[...config.spotStatus.keys()];
+              const total=data.map(d=>d.shape_area*1).reduce((a,b)=>a+b,0);
+              const sumMap=new Map(
+                statusKeys.map(s=>{                  
+                  return [s,0];
+                })
+              );
+              data.forEach((d)=>{
+                const s=d.status;
+                let arr=statusKeys.slice();
+                arr.sort((a,b)=>a-b);
+                if(s>arr[0]){                  
+                  for (const [k,v] of sumMap.entries()) {
+                    if(k<s||k===s){                        
+                      sumMap.set(k,v+d.shape_area*1);
+                    }
+                  }
+                }else{                  
+                  let v=sumMap.get(arr[0]);
+                  sumMap.set(arr[0],v+d.shape_area*1)
+                }                
+              });              
+              this.chartData.total=total;
+              this.chartData.sumMap=sumMap;
+              this.$refs.checkChart.draw();              
             }
-            this.chartData.statusMap=statusMap;
-            this.$refs.checkChart.draw();
-            this.chartLoading=false;
           }).catch(error=>{
-            console.error('获取统计信息错误!',error);
+            console.log(error);
           });
-
           break;
         //附件
         case '2':          
@@ -100,7 +111,7 @@ export default {
       switch(oName){
         //统计信息
         case '1':
-          this.$refs.checkChart.clearChart();
+          // this.$refs.checkChart.clearChart();
           break;
         //附件
         case '2':

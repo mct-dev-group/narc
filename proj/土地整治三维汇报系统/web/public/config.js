@@ -51,7 +51,17 @@ config.spotStatus=new Map([
   [4,'评审验收'],
   [5,'变更确认'],
   [6,'质量评定'],
-  [7,'指标确定'],  
+  [7,'指标确定'],
+]);
+//权重
+config.statusWeight=new Map([
+  [1,1/7],
+  [2,1/7],
+  [3,1/7],
+  [4,1/7],
+  [5,1/7],
+  [6,1/7],
+  [7,1/7],
 ]);
 //图斑状态变更
 config.spotStatusChange=new Map([
