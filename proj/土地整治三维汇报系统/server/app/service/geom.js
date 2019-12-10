@@ -94,7 +94,7 @@ class GeomService extends Service {
       const {total, sumMap} = this.ctx.helper.calculateStatusWeght(this.config.statusWeight, result);
       const obj = {};
       for (const [k,v] of sumMap) {
-        obj[k]= isNaN((v*100/total).toFixed(2))? '0%' : (v*100/total).toFixed(2)+'%';
+        obj[k]= isNaN((v*100/total).toFixed(2))? 0 : (v*100/total).toFixed(2)*1;
       }
 
       resultList.push({
