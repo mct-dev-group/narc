@@ -89,7 +89,7 @@ class GeomService extends Service {
     });
     let resultList = [];
     for (let i = 0; i < countryList.length; i++) {
-      const {gid, geom} = countryList[i];
+      const {gid, geom, xzqmc} = countryList[i];
       let result = await this.service.plan.getPlansIn(gid, DB);
       const {total, sumMap} = this.ctx.helper.calculateStatusWeght(this.config.statusWeight, result);
       const obj = {};
