@@ -92,14 +92,24 @@ class GeomService extends Service {
       const {gid, geom, xzqmc} = countryList[i];
       let result = await this.service.plan.getPlansIn(gid, DB);
       const {total, sumMap} = this.ctx.helper.calculateStatusWeght(this.config.statusWeight, result);
-      const obj = {};
-      for (const [k,v] of sumMap) {
-        obj[k]= isNaN((v*100/total).toFixed(2))? 0 : (v*100/total).toFixed(2)*1;
-      }
+      // const obj = {};
+      // for (const [k,v] of sumMap) {
+      //   obj[k]= isNaN((v*100/total).toFixed(2))? 0 : (v*100/total).toFixed(2)*1;
+      // }
 
+      let percentage=[...sumMap].map(s=>{
+        let [k,v]=s;
+        let weight=this.config.statusWeight.get(k);
+        return v*weight*100/total
+      }).reduce((a,b)=>a+b);
+      if (isNaN(percentage)) {
+        percentage = 0
+      }
+      percentage=percentage===0?0:percentage.toFixed(2)*1;
       resultList.push({
         xzqmc,
-        data: obj,
+        // data: obj,
+        percentage,
         geom: turf.center(JSON.parse(geom))
       });
     }
