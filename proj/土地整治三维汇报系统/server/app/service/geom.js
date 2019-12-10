@@ -83,7 +83,7 @@ class GeomService extends Service {
 
   async getAllCountryStatusWeight (DB) {
     const sequelize = this.app.Sequelize;
-    const url = `select gid, ST_AsGeoJSON(geom) as geom from country;`;
+    const url = `select gid, xzqmc, ST_AsGeoJSON(geom) as geom from country;`;
     const countryList = await this.ctx[DB].query(url, {
       type: sequelize.QueryTypes.SELECT
     });
@@ -98,6 +98,7 @@ class GeomService extends Service {
       }
 
       resultList.push({
+        xzqmc,
         data: obj,
         geom: turf.center(JSON.parse(geom))
       });
