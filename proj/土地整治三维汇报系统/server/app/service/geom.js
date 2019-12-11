@@ -49,7 +49,9 @@ class GeomService extends Service {
    */
   async updateStatusForCountry (DB) {
     const sequelize = this.app.Sequelize;
-    const url = `select gid from country;`;
+    // const url = `select gid from country;`;
+    const url = `select cvt.gid as gid from country_village_tree cvt left join country c on cvt.id = c.gid where cvt.from_table = 'country' ;`
+
     const countryList = await this.ctx[DB].query(url, {
       type: sequelize.QueryTypes.SELECT
     });
@@ -83,14 +85,16 @@ class GeomService extends Service {
 
   async getAllCountryStatusWeight (DB) {
     const sequelize = this.app.Sequelize;
-    const url = `select gid, xzqmc, ST_AsGeoJSON(geom) as geom from country;`;
+    // const url = `select gid, xzqmc, ST_AsGeoJSON(geom) as geom from country;`;
+    const url = `select cvt.gid as gid, c.xzqmc as xzqmc, ST_AsGeoJSON(c.geom) as geom from country_village_tree cvt left join country c on cvt.id = c.gid where cvt.from_table = 'country' ;`
     const countryList = await this.ctx[DB].query(url, {
       type: sequelize.QueryTypes.SELECT
     });
     let resultList = [];
     for (let i = 0; i < countryList.length; i++) {
       const {gid, geom, xzqmc} = countryList[i];
-      let result = await this.service.plan.getPlansIn(gid, DB);
+      const result = await this.service.plan.getPlansIn(gid, DB);
+      // console.log(result);
       const {total, sumMap} = this.ctx.helper.calculateStatusWeght(this.config.statusWeight, result);
       // const obj = {};
       // for (const [k,v] of sumMap) {
