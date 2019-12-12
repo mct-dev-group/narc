@@ -125,7 +125,7 @@ export default {
 <style lang="scss" scoped>
   .plugManager {
     height: 40px;
-    z-index: 6;
+    z-index: 11;
     display: flex;
     justify-content: flex-end;
     position: absolute;

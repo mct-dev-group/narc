@@ -26,21 +26,29 @@
         </li>
       </ul>
     </el-card>
-    <tabs
-      v-show='showTabs'
-      ref='tabs'
-      :activeTab='activeTab'
-      :dataForTabs='dataForTabs'
-      @update:showTabs='showTabs=false'
-      @update:activeTab='activeTab="0"'
-      @update:lastLayer='lastLayer="null"'
-    />
+    <el-dialog
+      :title='dialogTitle'
+      :visible.sync="tabsVisible"
+      :close-on-click-modal='false'      
+      width="640px"
+      append-to-body
+      @close='handleDialogClose'
+    >
+      <tabs
+        ref='tabs'
+        v-loading='loading'
+        :activeTab='activeTab'
+        :dataForTabs='dataForTabs'
+        @update:activeTab='activeTab="0"'
+        @update:lastLayer='lastLayer="null"'
+      />
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import turf from 'turf';
-import { getCurrentAreaInfo,getLeafNodeList } from '@/api/api';
+import { getCurrentAreaInfo} from '@/api/api';
 import tabs from '@/components/ui/tabs.vue';
 import {get} from '@/utils/fetch';
 
@@ -71,17 +79,16 @@ const menu=[
 export default {
   name: 'leftTree',
   data () {
-    return {
+    return {      
       AnnoId:'',
       AnnoTimeout:null,
       defArr:['county.0'],
-      searchText:'',
-      showTabs:false,
-      activeTab:'',
+      searchText:'',      
+      activeTab:'0',
       dataForTabs:{},
       menu:[],
       treeData:[{
-          label: "一级 1",
+          label: "加载中...",
           children: []
       }],
       props: {
@@ -92,6 +99,9 @@ export default {
       lightColor: '#189e08',
       DB:this.$store.state.db,
       lastLayer:'',
+      tabsVisible:false,
+      loading:true,
+      dialogTitle:''
     }
   },
   watch: {
@@ -117,8 +127,7 @@ export default {
           }, 2000)
     },
     lastLayer:{
-      handler:function(val,oldval){
-        // console.log(val,oldval);
+      handler:function(val,oldval){        
         if(!val||val==='null')return;
         const arr=val.split('_');
         const data=this.$refs.tree.getNode(arr[0]).data;
@@ -136,8 +145,16 @@ export default {
     tabs
   },
   methods:{
-    openDetails(data){ 
-      this.dataForTabs.title=data.label;
+    openDetails(data){
+      let title=data.label;
+      let n=node;
+      while(n.parent&&n.level!==1){
+        if(n.parent.level!==0){
+          title=n.parent.data.label+'-'+title;          
+        }
+        n=n.parent;
+      }      
+      this.dialogTitle=title;      
       this.dataForTabs.gid=data.gid;       
       switch(data.from_table){
         case 'county' :
@@ -159,9 +176,7 @@ export default {
           this.dataForTabs.showType=3;
           break;
       }
-      let leafNodeList=getLeafNodeList(data);
-      let plan=leafNodeList.filter(v=>v.from_table==='plan');
-      this.dataForTabs.plan=plan;
+
       this.menuMousedown('3');
     },
     clickRow (data,node) {
@@ -170,21 +185,26 @@ export default {
     },
     handleContextmenu(evt,data,node){      
       if(!data.from_table) return;
-      this.$store.commit('setShowMenu', true);
-      // this.showTabs=false;
-      this.$refs.tabs.closeTabsBox();
-      console.log(data);
-      // this.lastLayer=node.key+'_true';
+      this.$store.commit('setShowMenu', true);            
+
       this.getCurrentAreaInfo(data,true);
 
-      
+      let title=data.label;
+      let n=node;
+      while(n.parent&&n.level!==1){
+        if(n.parent.level!==0){
+          title=n.parent.data.label+'-'+title;          
+        }
+        n=n.parent;
+      }      
+      this.dialogTitle=title;
+
       const menuDom=document.getElementById('menuCotainer');
       menuDom.style.left=evt.clientX+'px';
       menuDom.style.top=evt.clientY+'px';
 
-      this.dataForTabs.title=data.label;
-      this.dataForTabs.gid=data.gid;
-      this.dataForTabs.planId=data.id;
+      
+      this.dataForTabs.gid=data.gid;      
       switch(data.from_table){
         case 'county' :
           let menuCopy=menu.slice();
@@ -205,20 +225,20 @@ export default {
           this.menu=[menu[2]];
           this.dataForTabs.showType=3;
           break;
-      }
-      let leafNodeList=getLeafNodeList(data);
-      let plan=leafNodeList.filter(v=>v.from_table==='plan');
-      this.dataForTabs.plan=plan;      
+      }          
     },
-
     menuMousedown(id){
-      let th = this;
       //附件查看
+      this.tabsVisible=true;
+      this.loading=true;
       get("/attachs/getAttachmentListById/" +this.dataForTabs.gid + "/"+this.DB).then(res=>{
-        th.dataForTabs.data=res.data;
-        th.showTabs=true;
-        th.activeTab=id;
+        this.loading=false;
+        this.dataForTabs.data=res.data;
+        this.activeTab=id;
       });
+    },
+    handleDialogClose(){      
+      this.$refs.tabs.closeTabsBox();      
     },
     filterNode(value, data) {
       if (!value) return true;
@@ -233,11 +253,9 @@ export default {
         }
         getCurrentAreaInfo(parmas).then( result => {
           if (result.code && result.code == 1 && result.data && result.data.length > 0) { // 查询成功
-            const center = turf.center(result.data[0].geom);
-            console.log();
+            const center = turf.center(result.data[0].geom);            
             const z=bt_Util.getCameraParam().lookatPt.z;
-            canFly==='true'&&bt_Util.executeScript('Render\\CameraControl\\FlyTo2 '+center.geometry.coordinates[0]+' '+center.geometry.coordinates[1]+' '+z+';');
-					  // bt_Util.executeScript(`Render\\CameraControl\\FlyTo ${center.geometry.coordinates[0]} ${center.geometry.coordinates[1]} 30000 ${center.geometry.coordinates[0]} ${center.geometry.coordinates[1]} 5000;`);
+            canFly==='true'&&bt_Util.executeScript('Render\\CameraControl\\FlyTo2 '+center.geometry.coordinates[0]+' '+center.geometry.coordinates[1]+' '+z+';');					  
             this.setLight(result.data[0].geom);
 
             this.dataForTabs.details=result.data[0];
@@ -287,15 +305,19 @@ export default {
     },true);
 
     get("/attachs/getTree/"+this.DB).then(res=>{
-      //计算目录树
+      //计算目录树      
       th.treeData = makeTree(diffQLGH(res.data));
     }).catch(error=>{
+      this.$message.error('树获取错误！请刷新！');
       console.error('树获取错误！',error);
     });
     function diffQLGH(data) {
       const QLGH = [];
       const dupChaeck = [];
-      data.forEach(a => {
+      data.forEach(a => {        
+        if(a.label==='县'){
+          a.label=th.$store.state.systemName;
+        }
         a.geomId = a.from_table+'.'+a.id;
         if (a.from_table == "spot" || a.from_table == "plan") {
           const qg = {
@@ -309,13 +331,14 @@ export default {
           }
           a.parent = qg.gid;
         }
+        a.path=a.label;
       });
       return [...data, ...QLGH];
     }
-    function makeTree(data) {
+    function makeTree(data) {      
       let tree = [];
-      let hasNoChild = data.filter(a => {
-        if (data.filter(b => b.parent == a.gid).length) {
+      let hasNoChild = data.filter(a => {         
+        if (data.filter(b => b.parent == a.gid).length) {                    
           tree.push(a);
           return false;
         } else {
@@ -324,7 +347,7 @@ export default {
       });
       if (hasNoChild.length == data.length) return data;
       hasNoChild.map(nc => {
-        tree.map(d => {
+        tree.map(d => {          
           if (nc.parent == d.gid) {
             d.children = d.children ? d.children : [];
             d.children.push(nc);
@@ -333,21 +356,10 @@ export default {
       });
       return makeTree(tree);
     }
-    // bt_event.addEventListener('GUIEvent\\KM\\OnMouseClick',function(evt){
-    //   if(evt[0]===2){
-    //     th.setLight('');
-    //   }
-    // });
-    
-    // document.body.addEventListener('keyup',clearLight.bind(this));
   },
-  beforeDestroy(){
-    // document.body.removeEventListener();
-  }
 }
 
-function clearLight(evt){
-  console.log(111);
+function clearLight(evt){  
   if(evt.keyCode===27){
     this.setLight('');
     if(this.AnnoTimeout){
@@ -409,6 +421,8 @@ function clearLight(evt){
     font-size: 18px;
     margin-right: 12px;
   }
+
+  
 
 }
 

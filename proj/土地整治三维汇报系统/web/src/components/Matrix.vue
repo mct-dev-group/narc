@@ -32,9 +32,10 @@ export default {
       // bt_Util.executeScript("Render\\RenderDataContex\\DataPump\\OsgScene\\OpenOsgScene mc://http://192.168.0.250:9005/pb/ index.pb;");
             
       // bt_Util.executeScript('Render\\CameraControl\\FlyTo2 536900 3804500 50;');
-
-      bt_Util.executeScript("Render\\RenderDataContex\\DataPump\\OsgScene\\OpenOsgScene mc://"+config.indePbUrl+" index.pb;");
-	    bt_Util.executeScript("Render\\RenderDataContex\\DataPump\\OsgScene\\OpenOsgScene mc://"+config.terrainPbUrl+" terrain.osgb.pb;");
+      this.$store.state.pbUrls.forEach(url => {
+        bt_Util.executeScript("Render\\RenderDataContex\\DataPump\\OsgScene\\OpenOsgScene mc://"+url+";");
+      });
+      	    
 	  
 	    bt_Util.executeScript('Render\\CameraControl\\FlyTo3 524437 3959195 9542 524462 3961135 136.673102 5000;');
     }

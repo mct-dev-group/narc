@@ -1,16 +1,11 @@
 <template>
   <div class="tabsBox">
-    <el-button size="mini" type='text' icon="el-icon-close" @click="closeTabsBox"></el-button>
-    <div class="title">
-      {{dataForTabs.title}}&nbsp;-&nbsp;整治详情
-    </div>
     <div class="content">
       <el-tabs
         :value='activeTab'
         stretch
         :before-leave='handle'
-        ref='activeTab'
-        @tab-click='handleClick'
+        ref='activeTab'        
       >
         <el-tab-pane label="统计信息" name='1' v-if='dataForTabs.showType===0||dataForTabs.showType===1'>
           <checkChart v-loading='chartLoading' :chartData='chartData' ref='checkChart' />          
@@ -100,6 +95,7 @@ export default {
               }                                        
             }
           }).catch(error=>{
+            this.$message.error('统计数据获取出错！');
             console.log(error);
           });
           break;
@@ -127,18 +123,14 @@ export default {
           break;        
       }
     },
-    closeTabsBox(){      
-      this.$emit('update:showTabs');
+    closeTabsBox(){
       this.$emit('update:activeTab');
       this.$emit('update:lastLayer');
       this.$refs.checkChart&&this.$refs.checkChart.clearChart();
       this.$refs.attachments&&this.$refs.attachments.clear();
       this.$refs.checkDetail&&this.$refs.checkDetail.clear();
       this.$refs.processFile&&this.$refs.processFile.clear();
-    },
-    handleClick(tab){
-      // console.log(tab);
-    },
+    },              
     getData(){
       this.$emit('update:files');
     }
@@ -148,15 +140,12 @@ export default {
 
 <style lang="scss" scoped>
 .tabsBox{
-  position: fixed;
-  top:64px;
-  left:50%;
-  transform: translateX(-50%);
   width: 600px;
+  margin: 0 auto;
 
   background-color: #fff;
   border-radius: 8px;
-
+    
   .el-button{
     position: absolute;
     top:5px;
@@ -171,7 +160,7 @@ export default {
     font-weight: bold;
   }
   .content{
-    height: 400px;
+    height: 450px;
   }
 
 }

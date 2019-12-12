@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import {post} from '@/utils/fetch';
+import {get,post} from '@/utils/fetch';
 import {arr1Dto2D} from '@/utils/common';
 
 export default {
@@ -90,14 +90,21 @@ export default {
         post("/attachs/post"+type,fd).then(res=>{          
           if(res.code===1){
             this.$message.success(`${typeName}文件上传成功！`);
+            return get('/geom/updateStatusForCountry/'+this.DB);
           }else{
             this.$message.error(`Error！`);
             this.errors=res.data;
             this.dialogVisible=true;
+            throw new Error('error');
+          }
+        }).then(res=>{
+          if(res.code!==1){
+            this.$message.error(`图层更新出错！`);
+            throw new Error('图层更新出错！');
           }
         }).catch(error=>{
           console.error(error);
-        }).finally(()=>{          
+        }).finally(()=>{
           this.$refs[type][0].clearFiles();
         });
       }else{

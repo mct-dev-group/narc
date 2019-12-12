@@ -4,7 +4,7 @@
     <div id="chartMap"></div>
     <el-dialog class="chartDialog" title="项目列表" width="400px" :visible.sync="dialogTableVisible">
       <ul class="proJ">
-        <router-link
+        <router-link          
           style=""
           tag="li"
           v-for="(item, index) in proJList" 
@@ -12,7 +12,12 @@
           :to="{
             name: 'home',
             params: {
-              db: item.db
+              db: item.db,
+              title:item.title,
+              uploadServerUrl:item.uploadServerUrl,                        
+              pbUrls:item.pbUrls,
+              indexCameraParam:item.indexCameraParam,
+              geoServices:item.geoServices,    
             }
           }"
         >
@@ -129,34 +134,7 @@ export default {
               areaColor: '#0b1c2d'
             }
           },
-          regions: [
-            /** start 省 start */
-            {
-              name: '河南',
-              hasProj: true,
-              itemStyle: {
-                normal: {
-                  areaColor: '#15486d'
-                }
-              }
-            },
-            {
-              name: '鹤壁市',
-              hasProj: true,
-              proJList: [
-                {
-                  title: '淇滨区',
-                  db: 'qibin_db'
-                }
-              ],
-              itemStyle: {
-                normal: {
-                  areaColor: '#15486d'
-                }
-              }
-            }
-            /** end 省 end */
-          ]
+          regions: config.prjs          
         }
       };
       this.myOpt = option;
@@ -165,9 +143,9 @@ export default {
       this.myChart.on('click', params => {
         const { name, region } = params;
         if (region && region.hasProj && region.proJList) {
-          // 弹出县级项目列表
+          // 弹出县级项目列表          
           this.proJList = region.proJList;
-          this.dialogTableVisible = true;
+          this.dialogTableVisible = true;          
         } else if (region && region.hasProj) {
           const py = name=='陕西' ? jsPY.getFullChars(name).toLowerCase()+'1' : jsPY.getFullChars(name).toLowerCase();
           this.registerMapData(py);

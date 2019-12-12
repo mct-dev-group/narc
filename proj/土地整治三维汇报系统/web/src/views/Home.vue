@@ -29,6 +29,19 @@ import searchWMSdb from '@/components/plug/searchWMSdb.vue';
 
 export default {
   name: 'home',
+  data(){
+    return {
+      configError:false
+    }
+  },
+  watch:{
+    configError:function(){
+      if(this.configError){
+        this.$message.error('配置信息有误！');
+        this.$router.replace('/');
+      }
+    }
+  },
   components: {
     Matrix,
     Compass,
@@ -42,8 +55,26 @@ export default {
     searchWMSdb
   },
   created () {
-    const db = this.$route.params.db ? this.$route.params.db : 'qibin_db';
-    this.$store.commit('setCurrentDB', db);
+    const mapping=[
+      ['db','setCurrentDB'],
+      ['title','setSystemName'],
+      ['pbUrls','setPbUrls'],
+      ['indexCameraParam','setIndexCameraParam'],
+      ['geoServices','setGeoServices']
+    ];
+    
+    mapping.forEach(a=>{      
+      const [k,v]=a;
+      if(k in this.$route.params){
+        if(!this.$route.params[k]){
+          this.configError=true;
+          return
+        }
+        this.$store.commit(v, this.$route.params[k]);
+      }else{
+        this.configError=true;
+      }
+    });
   }
 }
 </script>

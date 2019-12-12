@@ -98,13 +98,15 @@ export default {
       this.uploadFile=[];
       this.radio='';
       this.errors=[];
+      this.tableProps=[];
+      this.downloadName='';
+      this.bolbUrl='';
     },
     checkExtendProps(status){      
       if(status>1){
         get(`/attachs/getF${status-1}to${status}Attach/${this.details.gid}/${this.DB}`).then(res=>{
           if(res.code===1){
-            const data=res.data;
-            console.log(data);
+            const data=res.data;            
             const {mime_type,blob_data,file_name,file_type} = data;
             this.downloadName=file_name+'.'+file_type;
             this.bolbUrl=`data:${mime_type};base64,` + blob_data;
@@ -146,7 +148,7 @@ div{
   color: #F56C6C;
 }
 .checkDetail{    
-  height: 340px;
+  height: 360px;
   padding:5px  10px 0 10px;  
   overflow: hidden;
 

@@ -2,7 +2,7 @@
   <div class="attachments">
     <el-tabs 
       tab-position='left'
-      style="height: 340px;"
+      style="height: 360px;"
       :value='activeTab'
       :before-leave='handleBeforeLeave'
     >

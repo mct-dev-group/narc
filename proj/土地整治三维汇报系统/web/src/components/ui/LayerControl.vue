@@ -11,10 +11,18 @@
         >{{layer.title}}</el-checkbox>
       </el-checkbox-group>
     </div>
+    <el-switch
+      v-model="showChart"
+      active-text='各乡进度总览'
+      style="margin:10px 20px;"
+      @change='handleSwitchChange'
+    >
+    </el-switch>
   </div>
 </template>
 
 <script>
+import {get} from '@/utils/fetch';
 import evenBus from '@/utils/event_bus';
 import WMSHelper from "@/utils/wms_helper";
 export default {
@@ -30,7 +38,9 @@ export default {
       // 是否正在发送请求
       sendingRequest: false,
       // 相机在上一次请求图片时的位置
-      lastP: null
+      lastP: null,
+      showChart:false,
+      annos:[]
     };
   },
   watch: {
@@ -61,7 +71,7 @@ export default {
   },
   methods: {
     init() {
-      this.wms = config.services.wms;
+      this.wms = this.$store.state.geoServices.wms;
       this.getLayerList();
       // 激活场景事件
       bt_event.addEventListener("Render\\BeforeRender", this.onBeforRender);
@@ -161,9 +171,93 @@ export default {
           Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2) + Math.pow(z1 - z2, 2)
         )
       );
+    },
+    handleSwitchChange(status){
+      if(status){
+        get('/geom/getAllCountryStatusWeight/'+this.$store.state.db).then(res=>{
+          if(res.code===1){
+            const data=res.data;            
+            data.map((d,i)=>{              
+              const [x,y]=d.geom.geometry.coordinates;
+              let r=bt_Util.lineIntersect(x,y,0,x,y,99999999);
+              if(r.intersected===1){
+                const div=`<div id="overviewChart${i}" class='overviewChartDiv'></div>`
+                bt_Plug_Annotation.setAnnotation('overview'+i,x,y,r.z,0,0,div,false);
+                this.annos.push('overview'+i);
+                //draw                               
+                let chart=this.$echarts.init(document.getElementById('overviewChart'+i));
+                const pieAreaSeriesData=[                  
+                  {value:d.percentage,name:'已完成'},
+                  {value:100-d.percentage,name:'未完成'}                  
+                ];                
+                let pieArea={
+                  title:{
+                    text:d.xzqmc,
+                    left:'center',
+                    textStyle:{
+                      fontSize:12
+                    }
+                  },
+                  legend:{
+                    show:false
+                  },
+                  tooltip:{
+                    formatter: function(params){                      
+                      return '已完成 '+(params.name==='未完成'?(100-params.percent).toFixed(2):params.percent)+'%'
+                    }
+                  },
+                  grid:{
+                    width:'100%',
+                    height:'70%',
+                    left :0,
+                    bottom:5
+                  },
+                  series : [
+                    {
+                      name: '详情统计',
+                      type: 'pie',
+                      radius: '75%',                      
+                      center: ['50%', '60%'],
+                      label:{
+                        show:false
+                      },
+                      labelLine:{
+                        show:false
+                      },
+                      itemStyle:{
+                        color:function(params){
+                          const colors=['#67C23A','#ebee30'];
+                          return colors[params.dataIndex]
+                        }
+                      },
+                      data:pieAreaSeriesData
+                    },
+                  ]
+                };                
+                // 使用刚指定的配置项和数据显示图表。
+                chart.setOption(pieArea);
+              }
+
+            })
+            
+          }else{
+            this.$message.error(`getAllCountryStatusWeight Error！`);
+            throw new Error(`getAllCountryStatusWeight Error！`);
+          }          
+        }).catch(error=>{
+          console.error(error);
+        })
+      }else{
+        this.annos.forEach(a=>{
+          bt_Plug_Annotation.removeAnnotation(a);
+        })
+      }
     }
   }
 };
+function drawOverviewChart(id){
+  
+}
 </script>
 
 <style lang="scss" scoped>
@@ -175,7 +269,7 @@ export default {
   right: 30px;
   top: 64px;
   border-radius: 5px;
-  z-index: 6;
+  z-index: 11;
 
   .title {
     background: #33586C;
@@ -199,5 +293,13 @@ export default {
       }
     }
   }
+}
+</style>
+<style>
+.overviewChartDiv{
+  width:100px;
+  height: 80px;
+  border: 1px solid #CCC;
+  background: #ddd;
 }
 </style>

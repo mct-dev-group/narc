@@ -1,6 +1,6 @@
 header.header{    
     position: fixed;
-    z-index: 5;
+    z-index: 11;
     box-sizing: border-box;
     width: 100%;
     padding:10px;

@@ -137,9 +137,6 @@ export default {
                 th.planChart.clear();
                 th.planChart.setOption(barArea);
               }
-            },            
-            saveAsImage:{
-              pixelRatio:1
             },
           }
         },
@@ -183,9 +180,6 @@ export default {
                 th.planChart.clear();
                 th.planChart.setOption(pieArea);
               }
-            },            
-            saveAsImage:{
-              pixelRatio:1
             },
           }
         },
@@ -229,7 +223,7 @@ export default {
 
 <style lang="scss" scoped>
 .checkChart{
-  height: 340px;
+  height: 360px;
 
   .progress{        
     padding: 0 8px;

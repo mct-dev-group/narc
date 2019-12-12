@@ -9,8 +9,12 @@ export default new Vuex.Store({
     dbClickedPosition:{},
     isPlugDeactivateAll: true,
     plugList: [],
-    showMenu:false,
-    db: 'qibin_db'
+    showMenu:false,    
+    db: '',
+    systemName:'',
+    pbUrls:[],
+    indexCameraParam:'',
+    geoServices:null
   },
   mutations: {
     // 添加插件
@@ -31,6 +35,18 @@ export default new Vuex.Store({
     // 设置数据库
     setCurrentDB(state, db) {
       state.db = db;
+    },
+    setSystemName(state, name){
+      state.systemName = name;
+    },
+    setPbUrls(state,urls){
+      state.pbUrls=urls;
+    },
+    setIndexCameraParam(state,param){
+      state.indexCameraParam=param;
+    },
+    setGeoServices(state,services){
+      state.geoServices=services;
     },
     setShowMenu(state,flag){
       state.showMenu=flag;

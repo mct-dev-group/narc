@@ -5,7 +5,7 @@
 var config = {};
 
 // 图层控制
-config.services = {
+const qbServices={
   wms: {
     url: 'http://192.168.0.250:8888/geoserver/qibin/wms',
     version: '1.1.1',
@@ -37,11 +37,40 @@ config.services = {
     serverType: 'geoserver'
   }
 }
-//上传
-config.server='http://localhost:7001/';
 
-config.indePbUrl='http://192.168.0.250:9006/pb/';
-config.terrainPbUrl='http://192.168.0.250:9006/terrain/';
+config.prjs=[
+  {
+    name: '河南',
+    hasProj: true,
+    itemStyle: {
+      normal: {
+        areaColor: '#15486d'
+      }
+    }
+  },
+  {
+    name: '鹤壁市',
+    hasProj: true,
+    proJList: [
+      {
+        title: '淇滨区',
+        db: 'qibin_db',
+        pbUrls:['http://192.168.0.250:9006/pb/ index.pb','http://192.168.0.250:9006/terrain/ terrain.osgb.pb'],
+        indexCameraParam:'524437 3959195 9542 524462 3961135 136.673102',
+        geoServices:qbServices
+      }
+    ],
+    itemStyle: {
+      normal: {
+        areaColor: '#15486d'
+      }
+    }
+  }
+];
+
+config.baseUrl='http://localhost:7001/';
+
+
 
 //图斑状态
 config.spotStatus=new Map([

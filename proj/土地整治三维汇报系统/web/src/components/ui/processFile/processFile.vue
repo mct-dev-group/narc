@@ -1,6 +1,6 @@
 <template>
   <div class="processFile">
-    <el-tabs tab-position='left' style="height: 340px;" :value='activeTab' :before-leave='handleBeforeLeave'>
+    <el-tabs tab-position='left' style="height: 360px;" :value='activeTab' :before-leave='handleBeforeLeave'>
       <el-tab-pane label="文件上传" name='1' style='height:100%;'>
         <uploadProcessFile  ref='uploadProcessFile' :gid='gid' />
     </el-tab-pane>
