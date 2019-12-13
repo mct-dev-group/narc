@@ -116,12 +116,12 @@ export default {
           this.defArr = [this.$store.state.dbClickedLayer];
           this.treeData = [...this.treeData]          
           this.$refs.tree.setCurrentKey(this.$store.state.dbClickedLayer);
-          this.lastLayer=this.$store.state.dbClickedLayer;
-          const data = this.$refs.tree.getCurrentNode();
+          this.lastLayer=this.$store.state.dbClickedLayer;          
+          const node =this.$refs.tree.getNode(this.$store.state.dbClickedLayer);                    
           const {x,y,z} = this.$store.state.dbClickedPosition;          
-          $Vue.openDetails = () => this.openDetails(data)
+          $Vue.openDetails = () => this.openDetails(node)
           this.AnnoId = Math.random().toString(36).substring(7)
-          bt_Plug_Annotation.setAnnotation(this.AnnoId, x, y, z, -8, -16, "<div class='pop-card pop-card-2'><div style='background-color:#33586c;border-top-left-radius: 4px;border-top-right-radius: 4px;'><span style='color:white;font-size:14px;line-height:25px;'>"+ data.label +"</span></div><hr><a style='color:#2196f3;cursor:pointer;padding-top:10px;line-height:33px;' onclick='$Vue.openDetails()'>查看详情</a></div>", false);
+          bt_Plug_Annotation.setAnnotation(this.AnnoId, x, y, z, -8, -16, "<div class='pop-card pop-card-2'><div style='background-color:#33586c;border-top-left-radius: 4px;border-top-right-radius: 4px;'><span style='color:white;font-size:14px;line-height:25px;'>"+ node.data.label +"</span></div><hr><a style='color:#2196f3;cursor:pointer;padding-top:10px;line-height:33px;' onclick='$Vue.openDetails()'>查看详情</a></div>", false);
           this.AnnoTimeout = setTimeout(()=>{
             bt_Plug_Annotation.removeAnnotation(this.AnnoId);
           }, 2000)
@@ -145,7 +145,8 @@ export default {
     tabs
   },
   methods:{
-    openDetails(data){
+    openDetails(node){      
+      const data=node.data;
       let title=data.label;
       let n=node;
       while(n.parent&&n.level!==1){
