@@ -112,6 +112,7 @@ class GeomService extends Service {
       percentage=percentage===0?0:percentage.toFixed(2)*1;
       resultList.push({
         xzqmc,
+        count: result.length,
         // data: obj,
         percentage,
         geom: turf.center(JSON.parse(geom))
