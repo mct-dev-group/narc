@@ -35,8 +35,7 @@
       @close='handleDialogClose'
     >
       <tabs
-        ref='tabs'
-        v-loading='loading'
+        ref='tabs'        
         :activeTab='activeTab'
         :dataForTabs='dataForTabs'
         @update:activeTab='activeTab="0"'
@@ -85,7 +84,9 @@ export default {
       defArr:['county.0'],
       searchText:'',      
       activeTab:'0',
-      dataForTabs:{},
+      dataForTabs:{
+        showType:-1
+      },
       menu:[],
       treeData:[{
           label: "加载中...",
@@ -99,8 +100,7 @@ export default {
       lightColor: '#189e08',
       DB:this.$store.state.db,
       lastLayer:'',
-      tabsVisible:false,
-      loading:true,
+      tabsVisible:false,      
       dialogTitle:''
     }
   },
@@ -228,18 +228,12 @@ export default {
           break;
       }          
     },
-    menuMousedown(id){
-      //附件查看
+    menuMousedown(id){      
       this.tabsVisible=true;
-      this.loading=true;
-      get("/attachs/getAttachmentListById/" +this.dataForTabs.gid + "/"+this.DB).then(res=>{
-        this.loading=false;
-        this.dataForTabs.data=res.data;
-        this.activeTab=id;
-      });
+      this.activeTab=id;      
     },
     handleDialogClose(){      
-      this.$refs.tabs.closeTabsBox();      
+      this.$refs.tabs&&this.$refs.tabs.closeTabsBox();      
     },
     filterNode(value, data) {
       if (!value) return true;
@@ -309,7 +303,7 @@ export default {
       //计算目录树      
       th.treeData = makeTree(diffQLGH(res.data));
     }).catch(error=>{
-      this.$message.error('树获取错误！请刷新！');
+      this.$message.error('树获取错误！');
       console.error('树获取错误！',error);
     });
     function diffQLGH(data) {

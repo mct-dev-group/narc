@@ -6,7 +6,7 @@
         stretch
         :before-leave='handle'
         ref='activeTab'        
-      >
+      >        
         <el-tab-pane label="统计信息" name='1' v-if='dataForTabs.showType===0||dataForTabs.showType===1'>
           <checkChart v-loading='chartLoading' :chartData='chartData' ref='checkChart' />          
         </el-tab-pane>
@@ -36,7 +36,8 @@ export default {
     return {
       chartData:{
         total:0,
-        sumMap:null
+        sumMap:null,
+        countMap:null
       },
       checkLoading:false,
       chartLoading:false,
@@ -50,7 +51,7 @@ export default {
     attachments, 
     checkDetail,    
     processFile
-  },
+  },  
   methods: {
     handle(aName,oName){
       switch(aName){
@@ -61,7 +62,7 @@ export default {
           get('/plan/getPlansIn/'+this.dataForTabs.gid+'/'+this.DB).then(res=>{            
             if(res.code===1){
               this.chartLoading=false;
-              let data=res.data;
+              let data=res.data;              
               if(data.length>0){                
                 const statusKeys=[...config.spotStatus.keys()];
                 const total=data.map(d=>d.shape_area*1).reduce((a,b)=>a+b,0);
@@ -70,6 +71,14 @@ export default {
                     return [s,0];
                   })
                 );
+                const countMap=new Map(
+                  statusKeys.map(s=>{
+                    return [s,0];
+                  })
+                );
+                [...countMap.keys()].forEach(k=>{
+                  countMap.set(k,data.filter(d=>d.status===k).length);
+                });                
                 data.forEach((d)=>{
                   const s=d.status;
                   let arr=statusKeys.slice();
@@ -83,16 +92,17 @@ export default {
                   }else{                  
                     let v=sumMap.get(arr[0]);
                     sumMap.set(arr[0],v+d.shape_area*1)
-                  }                
-                });              
+                  }                  
+                });
                 this.chartData.total=total;
                 this.chartData.sumMap=sumMap;
-                this.$refs.checkChart.draw(); 
+                this.chartData.countMap=countMap;                
               }else{
                 this.chartData.total=0;
                 this.chartData.sumMap=null;
-                this.$refs.checkChart.draw(); 
-              }                                        
+                this.chartData.countMap=null;                
+              }
+              this.$refs.checkChart.draw();
             }
           }).catch(error=>{
             this.$message.error('统计数据获取出错！');
@@ -108,11 +118,7 @@ export default {
           this.$refs.processFile.activeTab='1';
           break;
       };
-      switch(oName){
-        //统计信息
-        case '1':
-          // this.$refs.checkChart.clearChart();
-          break;
+      switch(oName){        
         //附件
         case '2':
           this.$refs.attachments.activeTab='0';

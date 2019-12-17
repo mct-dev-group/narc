@@ -187,8 +187,8 @@ export default {
                 //draw                               
                 let chart=this.$echarts.init(document.getElementById('overviewChart'+i));
                 const pieAreaSeriesData=[                  
-                  {value:d.percentage,name:'已完成'},
-                  {value:100-d.percentage,name:'未完成'}                  
+                  {value:d.percentage,name:'已完成',count:d.count},
+                  {value:100-d.percentage,name:'未完成',count:d.count}                  
                 ];                
                 let pieArea={
                   title:{
@@ -202,8 +202,8 @@ export default {
                     show:false
                   },
                   tooltip:{
-                    formatter: function(params){                      
-                      return '已完成 '+(params.name==='未完成'?(100-params.percent).toFixed(2):params.percent)+'%'
+                    formatter: function(params){
+                      return '已完成工作量占比 '+(params.name==='未完成'?(100-params.percent).toFixed(2):params.percent)+'%<br/>总图斑数 '+params.data.count+' 个'
                     }
                   },
                   grid:{

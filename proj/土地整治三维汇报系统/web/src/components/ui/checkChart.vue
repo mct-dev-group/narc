@@ -26,9 +26,16 @@
     <div class="chart">
       <el-table 
         :data="tableData"
-        size='small'               
+        size='mini'
         style="width:580px;margin:0 auto;"
       >
+        <el-table-column
+          fixed="left"
+          label="说明"
+          width="70"
+          prop='title'
+        >      
+        </el-table-column>
         <el-table-column v-for="(v,i) of tableColumn" :key='i' :prop="v[0]+''" :label='v[1]'></el-table-column>            
       </el-table>
       <div id="planChart" ref="planChart" @click="handleClick"></div>
@@ -54,11 +61,16 @@ export default {
   computed:{
     tableData:function(){
       if(this.chartData.sumMap){
-        let obj={};
-        for (const [k,v] of this.chartData.sumMap) {
-          obj[k]=(v*100/this.chartData.total).toFixed(2)+'%';
+        let [obj1,obj2]=[{},{}];
+        for (const [k,v] of this.chartData.sumMap) {          
+          obj1[k]=(v*100/this.chartData.total).toFixed(2)+'%';
         }
-        return [obj]
+        for (const [k,v] of this.chartData.countMap) {          
+          obj2[k]=v;
+        }
+        obj1['title']='完成量';
+        obj2['title']='图斑个数';
+        return [obj1,obj2]
       }else{
         return [];
       }
@@ -223,7 +235,7 @@ export default {
 
 <style lang="scss" scoped>
 .checkChart{
-  height: 360px;
+  height: 380px;
 
   .progress{        
     padding: 0 8px;

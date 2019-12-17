@@ -43,9 +43,14 @@ export default {
     handleBeforeLeave(aName,oName){
       if(aName==='2'){
         this.loading=true;
-        get("/attachs/getAttachmentListById/" +this.gid+'/'+this.DB).then(res=>{
-          this.files=res.data;
-          this.loading=false;
+        get("/attachs/getAttachmentListById/" +this.gid+'/'+this.DB).then(res=>{          
+          const promises=res.data.map(f=>get("/attachs/getAttachmentById/"+f.gid+"/"+this.DB));
+          return Promise.all(promises);
+        }).then(res=>{                    
+          this.files=res.filter(r=>r.code===1).map(a=>a.data[0]);
+          this.loading=false;          
+        }).catch(error=>{
+          console.error(error);
         });
       }
     }
