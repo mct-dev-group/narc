@@ -8,44 +8,44 @@ class AttachmentsService extends Service {
     const sequelize = this.app.Sequelize;
     const truncate = 'truncate table country_village_tree;';
     const seq_restart = 'alter sequence cvt_gid_seq restart with 1;';
-    const insert_county = 'insert into country_village_tree ( from_table, id, parent) values (\'county\',0,0);';
+    const insert_county = 'insert into country_village_tree ( from_table, id, parent) values (\'county\',\'0\',0);';
     const insert_country = `insert into country_village_tree ( from_table, id, parent)
-      (select  'country', gid, (select x.gid from country_village_tree x where parent=0) from country c
-      where not exists (select 1 from country_village_tree ct
-      where ct.id = c.gid and ct.from_table = 'country'));`;
+    (select  'country', cast(gid as text), (select x.gid from country_village_tree x where parent=0) from country c
+    where not exists (select 1 from country_village_tree ct
+    where ct.id =  cast(c.gid as text) and ct.from_table = 'country'));`;
     const insert_village = `insert into country_village_tree ( from_table, id, parent)
-      (select  'village',
-      ov.gid,
-      (select cv.gid from country c,village v,country_village_tree cv
-      where ST_Area(ST_Intersection(c.geom,v.geom)) > (ST_Area(v.geom)/2)
-      and v.gid = ov.gid
-      and cv.from_table = 'country'
-      and cv.id = c.gid)
-      from village ov
-      where not exists (select 1 from country_village_tree ct
-      where ct.id = ov.gid and ct.from_table = 'village'));`;
+    (select  'village',
+    cast(ov.gid as text),
+    (select cv.gid from country c,village v,country_village_tree cv
+    where ST_Area(ST_Intersection(c.geom,v.geom)) > (ST_Area(v.geom)/2)
+    and v.gid = ov.gid
+    and cv.from_table = 'country'
+    and cv.id = cast(c.gid as text))
+    from village ov
+    where not exists (select 1 from country_village_tree ct
+    where ct.id = cast(ov.gid as text) and ct.from_table = 'village'));`;
     const insert_plan = `insert into country_village_tree ( from_table, id, parent)
-      (select  'plan',
-      op.gid,
-      (select cv.gid from village v, plan p, country_village_tree cv
-      where ST_Area(ST_Intersection(v.geom,p.geom)) > (ST_Area(p.geom)/2)
-      and p.gid = op.gid
-      and cv.from_table = 'village'
-      and cv.id = v.gid)
-      from plan op
-      where not exists (select 1 from country_village_tree ct
-      where ct.id = op.gid and ct.from_table = 'plan'));`;
+    (select  'plan',
+    op.uuid,
+    (select cv.gid from village v, plan p, country_village_tree cv
+    where ST_Area(ST_Intersection(v.geom,p.geom)) > (ST_Area(p.geom)/2)
+    and p.uuid = op.uuid
+    and cv.from_table = 'village'
+    and cv.id = cast(v.gid as text))
+    from plan op
+    where not exists (select 1 from country_village_tree ct
+    where ct.id = op.uuid and ct.from_table = 'plan'));`;
     const insert_spot = `insert into country_village_tree ( from_table, id, parent)
-      (select  'spot',
-      os.gid,
-      (select cv.gid from village v, spot s, country_village_tree cv
-      where ST_Area(ST_Intersection(v.geom,s.geom)) > (ST_Area(s.geom)/2)
-      and s.gid = os.gid
-      and cv.from_table = 'village'
-      and cv.id = v.gid)
-      from spot os
-      where not exists (select 1 from country_village_tree ct
-      where ct.id = os.gid and ct.from_table = 'spot'));`;
+    (select  'spot',
+    os.gid,
+    (select cv.gid from village v, spot s, country_village_tree cv
+    where ST_Area(ST_Intersection(v.geom,s.geom)) > (ST_Area(s.geom)/2)
+    and s.gid = os.gid
+    and cv.from_table = 'village'
+    and cv.id = cast(v.gid as text))
+    from spot os
+    where not exists (select 1 from country_village_tree ct
+    where ct.id = cast(os.gid as text) and ct.from_table = 'spot'));`;
 
     await this.app[DB].query(truncate, {
       type: sequelize.QueryTypes.TRUNCATE,
@@ -85,7 +85,7 @@ class AttachmentsService extends Service {
     when cvt.from_table = 'spot' then
       (select (cast (s.objectid as text)) as label from spot s where s.gid = cvt.id and cvt.from_table = 'spot')
     when cvt.from_table = 'plan' then
-      (select (cast (p.objectid as text)) as label from plan p where p.gid = cvt.id and cvt.from_table = 'plan')
+      (select (cast (p.objectid as text)) as label from plan p where p.uuid = cvt.id and cvt.from_table = 'plan')
     else
       '县'
     end as label
@@ -197,7 +197,7 @@ class AttachmentsService extends Service {
   async getAttachmentBySetpAndId(step, id, DB) {
     const sequelize = this.app.Sequelize;
     return await this.app[DB].query(
-      `select ${step}, ${step}_filename, ${step}_1, status from plan where gid = ${id};`,
+      `select ${step}, ${step}_filename, ${step}_1, status from plan where uuid = ${id};`,
       {
         type: sequelize.QueryTypes.SELECT,
       }
@@ -243,7 +243,7 @@ class AttachmentsService extends Service {
       ${step}= (?) 
       ${fileName ? `, ${step}_filename='${fileName}'` : ''}
       ${attr ? `, ${step}_1='${attr}'` : ''} 
-      where gid = '${id}';`;
+      where uuid = '${id}';`;
       return await await this.app[DB].query(
         sql,
         {
@@ -258,7 +258,7 @@ class AttachmentsService extends Service {
   // 所处状态查询
   async getStatus(gid, DB) {
     const sequelize = this.app.Sequelize;
-    const sql = `select status from plan where gid = ${gid}`;
+    const sql = `select status from plan where uuid = ${gid}`;
     return await this.app[DB].query(sql,
       {
         type: sequelize.QueryTypes.SELECT,
@@ -269,7 +269,7 @@ class AttachmentsService extends Service {
 
   async getF2to3(gid, DB) {
     const sequelize = this.app.Sequelize;
-    const sql = `select f2to3, f2to3_1 from plan where gid = ${gid}`;
+    const sql = `select f2to3, f2to3_1 from plan where uuid = ${gid}`;
     return await this.app[DB].query(sql,
       {
         type: sequelize.QueryTypes.SELECT,
