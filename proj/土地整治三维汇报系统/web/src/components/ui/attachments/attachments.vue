@@ -39,6 +39,7 @@ export default {
   methods: {
     clear(){
       this.activeTab='0';
+      this.files=null;
     },
     handleBeforeLeave(aName,oName){
       if(aName==='2'){

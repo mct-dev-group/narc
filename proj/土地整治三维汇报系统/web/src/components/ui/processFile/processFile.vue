@@ -53,6 +53,7 @@ export default {
     },    
     clear(){
       this.activeTab='0';
+      this.files=null;
     }
   }
 }
