@@ -157,7 +157,7 @@ class AttachmentsService extends Service {
             oa.attach_to_id
             from attachments oa
             where not exists (select 1 from country_village_tree ct
-            where ct.parent = oa.attach_to_id and ct.id = oa.gid));`,
+            where ct.parent = oa.attach_to_id and ct.id = cast(oa.gid as text));`,
       {
         type: sequelize.QueryTypes.INSERT,
       }
