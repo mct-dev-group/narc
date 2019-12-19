@@ -79,11 +79,11 @@ class AttachmentsService extends Service {
     select cvt.parent, cvt.gid, cvt.id, cvt.from_table,
     case
     when cvt.from_table = 'country' then
-      (select c.xzqmc as label from country c where c.gid = cvt.id and cvt.from_table = 'country')
+      (select c.xzqmc as label from country c where cast (c.gid as text) = cvt.id and cvt.from_table = 'country')
     when cvt.from_table = 'village' then
-      (select v.xzqmc as label from village v where v.gid = cvt.id and cvt.from_table = 'village')
+      (select v.xzqmc as label from village v where cast (v.gid as text) = cvt.id and cvt.from_table = 'village')
     when cvt.from_table = 'spot' then
-      (select (cast (s.objectid as text)) as label from spot s where s.gid = cvt.id and cvt.from_table = 'spot')
+      (select (cast (s.objectid as text)) as label from spot s where cast (s.gid as text) = cvt.id and cvt.from_table = 'spot')
     when cvt.from_table = 'plan' then
       (select (cast (p.objectid as text)) as label from plan p where p.uuid = cvt.id and cvt.from_table = 'plan')
     else
