@@ -40,7 +40,7 @@ class PlansService extends Service {
         }
       );
       const plan_uuids = plan_uuids_array_agg[0].array_agg;
-      console.log('asdfasdf',plan_uuids.toString());
+
       return plan_uuids ? await this.app[DB].query(
         `select shape_area, status from plan where uuid in (${array2string(plan_uuids)})`,
         {
@@ -57,7 +57,7 @@ class PlansService extends Service {
         }
       );
       const plan_uuids = plan_uuids_array_agg[0].array_agg;
-      console.log({plan_uuids});
+
       return plan_uuids ? await this.app[DB].query(
         `select shape_area, status from plan where uuid in (${array2string(plan_uuids)})`,
         {
