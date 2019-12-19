@@ -33,16 +33,16 @@ class PlansService extends Service {
       if (!village_ids) return [];
       const sql = `select array_agg(id) from country_village_tree where parent in (${village_ids.toString()}) and from_table = 'plan';`;
       console.log(sql);
-      const plan_gids_array_agg = await this.app[DB].query(
+      const plan_uuids_array_agg = await this.app[DB].query(
         sql,
         {
           type: sequelize.QueryTypes.SELECT,
         }
       );
-      const plan_gids = plan_gids_array_agg[0].array_agg;
-
-      return plan_gids ? await this.app[DB].query(
-        `select shape_area, status from plan where uuid in (${plan_gids.toString()})`,
+      const plan_uuids = plan_uuids_array_agg[0].array_agg;
+      console.log('asdfasdf',plan_uuids.toString());
+      return plan_uuids ? await this.app[DB].query(
+        `select shape_area, status from plan where uuid in (${array2string(plan_uuids)})`,
         {
           type: sequelize.QueryTypes.SELECT,
         }
@@ -50,21 +50,31 @@ class PlansService extends Service {
     }
     // 村
     if (table_name === 'village') {
-      const plan_gids_array_agg = await this.app[DB].query(
+      const plan_uuids_array_agg = await this.app[DB].query(
         `select array_agg(id) from country_village_tree where parent = ${gid} and from_table = 'plan';`,
         {
           type: sequelize.QueryTypes.SELECT,
         }
       );
-      const plan_gids = plan_gids_array_agg[0].array_agg;
-      return plan_gids ? await this.app[DB].query(
-        `select shape_area, status from plan where uuid in (${plan_gids.toString()})`,
+      const plan_uuids = plan_uuids_array_agg[0].array_agg;
+      console.log({plan_uuids});
+      return plan_uuids ? await this.app[DB].query(
+        `select shape_area, status from plan where uuid in (${array2string(plan_uuids)})`,
         {
           type: sequelize.QueryTypes.SELECT,
         }
       ) : [];
     }
   }
+}
+
+/**
+ * ['a','b','c'] -> "'a','b','c'" 
+ * @param {Array} arr array of strings
+ * @return {String}
+ */
+function array2string(arr){
+  return arr.map(a=>`'${a}'`).join(',')
 }
 
 module.exports = PlansService;
