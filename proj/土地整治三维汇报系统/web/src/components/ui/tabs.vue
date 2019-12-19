@@ -8,7 +8,7 @@
         ref='activeTab'        
       >        
         <el-tab-pane label="统计信息" name='1' v-if='dataForTabs.showType===0||dataForTabs.showType===1'>
-          <checkChart v-loading='chartLoading' :chartData='chartData' ref='checkChart' />          
+          <checkChart v-loading='chartLoading' element-loading-text="加载中..." :chartData='chartData' ref='checkChart' />          
         </el-tab-pane>
         <el-tab-pane label="附件" name='2' v-if='dataForTabs.showType!==3'>
           <attachments  ref='attachments' :gid='dataForTabs.gid' :files='files'/>

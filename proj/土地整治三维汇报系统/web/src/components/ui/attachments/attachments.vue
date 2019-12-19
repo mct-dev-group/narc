@@ -10,7 +10,7 @@
       <uploadATT  ref='uploadATT' :gid='gid' />
     </el-tab-pane>
     <el-tab-pane label='附件查看' name='2' style='height:100%;padding-right:10px;'>
-      <checkATT v-loading='loading' ref='checkATT' :gid='gid' :files='files'/>
+      <checkATT v-loading='loading' element-loading-text="加载中..." ref='checkATT' :gid='gid' :files='files'/>
     </el-tab-pane> 
     </el-tabs>
   </div>
@@ -38,7 +38,7 @@ export default {
   },
   methods: {
     clear(){
-      this.activeTab='0';      
+      this.activeTab='0';
     },
     handleBeforeLeave(aName,oName){
       if(aName==='2'){
