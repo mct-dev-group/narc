@@ -1,8 +1,13 @@
 <template>
   <div class="processFile">
-    <el-tabs tab-position='left' style="height: 360px;" :value='activeTab' :before-leave='handleBeforeLeave'>
-      <el-tab-pane label="文件上传" name='1' style='height:100%;'>
-        <uploadProcessFile  ref='uploadProcessFile' :gid='gid' />
+    <el-tabs 
+      tab-position='left' 
+      style="height: 360px;" 
+      :value='activeTab' 
+      :before-leave='handleBeforeLeave'
+    >
+    <el-tab-pane label="文件上传" name='1' style='height:100%;'>
+      <uploadProcessFile  ref='uploadProcessFile' :gid='gid' />
     </el-tab-pane>
     <el-tab-pane label='文件查看' name='2' style='height:100%;padding-right:10px;'>
       <checkProcessFile v-loading='loading'  element-loading-text="加载中..." ref='checkProcessFile' :gid='gid' :processFiles='files' />

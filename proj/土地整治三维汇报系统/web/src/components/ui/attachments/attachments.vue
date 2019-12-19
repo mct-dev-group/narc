@@ -6,7 +6,7 @@
       :value='activeTab'
       :before-leave='handleBeforeLeave'
     >
-      <el-tab-pane label="附件上传" name='1' style='height:100%;'>
+    <el-tab-pane label="附件上传" name='1' style='height:100%;'>
       <uploadATT  ref='uploadATT' :gid='gid' />
     </el-tab-pane>
     <el-tab-pane label='附件查看' name='2' style='height:100%;padding-right:10px;'>

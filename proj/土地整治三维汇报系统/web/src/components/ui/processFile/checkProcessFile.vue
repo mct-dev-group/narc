@@ -52,6 +52,9 @@ export default {
 
 <style lang="scss" scoped>
 .checkProcessFile{
+  height: 100%;
+  overflow-y: auto;
+  
   .el-row~.el-row {
     margin-top: 20px;    
   }
