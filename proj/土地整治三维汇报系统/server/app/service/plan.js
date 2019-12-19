@@ -42,7 +42,7 @@ class PlansService extends Service {
       const plan_gids = plan_gids_array_agg[0].array_agg;
 
       return plan_gids ? await this.app[DB].query(
-        `select shape_area, status from plan where gid in (${plan_gids.toString()})`,
+        `select shape_area, status from plan where uuid in (${plan_gids.toString()})`,
         {
           type: sequelize.QueryTypes.SELECT,
         }
@@ -58,7 +58,7 @@ class PlansService extends Service {
       );
       const plan_gids = plan_gids_array_agg[0].array_agg;
       return plan_gids ? await this.app[DB].query(
-        `select shape_area, status from plan where gid in (${plan_gids.toString()})`,
+        `select shape_area, status from plan where uuid in (${plan_gids.toString()})`,
         {
           type: sequelize.QueryTypes.SELECT,
         }
