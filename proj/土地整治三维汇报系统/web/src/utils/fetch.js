@@ -11,7 +11,8 @@ axios.interceptors.request.use(
     if(/^\/attachs\//.test(config.url)){
       config.headers = {
         'Content-Type': 'multipart/form-data'
-      }
+      };
+      config.timeout=0;
     }else{
       config.data = qs.stringify(config.data)
       config.headers = {

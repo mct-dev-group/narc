@@ -33,6 +33,7 @@
       width="640px"
       append-to-body
       @close='handleDialogClose'
+      @open='handleDialogOpen'
     >
       <tabs
         ref='tabs'        
@@ -100,8 +101,9 @@ export default {
       lightColor: '#189e08',
       DB:this.$store.state.db,
       lastLayer:'',
-      tabsVisible:false,      
-      dialogTitle:''
+      tabsVisible:false,
+      dialogTitle:'',
+      menuId:''
     }
   },
   watch: {
@@ -230,7 +232,13 @@ export default {
     },
     menuMousedown(id){      
       this.tabsVisible=true;
-      this.activeTab=id;      
+      this.menuId=id;      
+    },
+    handleDialogOpen(){
+      this.$nextTick(()=>{
+        this.activeTab=this.menuId;
+      })
+      
     },
     handleDialogClose(){      
       this.$refs.tabs&&this.$refs.tabs.closeTabsBox();      

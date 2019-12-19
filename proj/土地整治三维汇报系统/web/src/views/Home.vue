@@ -83,3 +83,8 @@ export default {
   height: 100vh;
 }
 </style>
+<style>
+.el-message{
+  z-index:9999 !important;
+}
+</style>

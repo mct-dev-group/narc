@@ -4,6 +4,10 @@
  */
 var config = {};
 
+//上传文件最大值
+config.uploadMaxSize=50*1024*1024;
+//附件允许文件类型
+config.fileTypeATT=['txt','doc','pdf','docx','xls','xlsx','ppt','jpg','png','gif'];
 // 图层控制
 const qbServices={
   wms: {

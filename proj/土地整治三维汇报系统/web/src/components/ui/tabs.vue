@@ -115,7 +115,9 @@ export default {
           break;
         //流程文件
         case '4':
-          this.$refs.processFile.activeTab='1';
+          this.$nextTick(()=>{
+            this.$refs.processFile.activeTab='1';
+          });          
           break;
       };
       switch(oName){        

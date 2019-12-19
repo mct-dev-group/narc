@@ -62,6 +62,11 @@ export default {
     },
     handleChange(file,fileList,type){     
       if(file.raw.type==='application/zip'){
+        if(file.size>config.uploadMaxSize){
+          this.$message.error('文件大小不能超过'+config.uploadMaxSize/1024/1024+'M！');
+          this.$refs[type][0].clearFiles();
+          return
+        }
         this.fileMap.set(type,file.raw);
       }else{
         this.$message.error('请选择文件格式为.zip的文件上传！');        
@@ -87,6 +92,13 @@ export default {
         fd.append("attach_type", type);
         fd.append("DB", this.DB);
         fd.append(type, file);
+        const loading = this.$loading({
+          lock: true,
+          text: '上传中...',
+          customClass:'test',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
         post("/attachs/post"+type,fd).then(res=>{          
           if(res.code===1){
             this.$message.success(`${typeName}文件上传成功！`);
@@ -105,6 +117,7 @@ export default {
         }).catch(error=>{
           console.error(error);
         }).finally(()=>{
+          loading.close();
           this.$refs[type][0].clearFiles();
         });
       }else{

@@ -10,8 +10,8 @@
     >
       <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
       <el-button style="margin-left: 10px;" size="small" type="success" @click="handleUpload">上传到服务器</el-button>
-      <div slot="tip" class="el-upload__tip">*只能上传'.txt','.doc','.pdf','.docx','.xls','.xlsx','.dppt'文件，且不超过50M</div>
-    </el-upload>
+      <div slot="tip" class="el-upload__tip">*只能上传{{fileType.join('，')}}文件，且不超过{{uploadMaxSize/1024/1024}}M</div>
+    </el-upload>    
   </div>
 </template>
 
@@ -23,7 +23,9 @@ export default {
     return {
       fileList:new Map(),
       DB:'',
-      fileType:['txt','doc','pdf','docx','xls','xlsx','ppt']
+      fileType:config.fileTypeATT,
+      uploadMaxSize:config.uploadMaxSize,
+      dialogVisible:false
     }
   },
   props:['gid'],
@@ -31,7 +33,7 @@ export default {
     this.DB=this.$store.state.db;
   },
   methods: {
-    handleChange(file){
+    handleChange(file){      
       this.fileList.set(file.uid,file.raw);
     },
     handleRemove(file){
@@ -43,9 +45,9 @@ export default {
         return;
       }
       let arr=[...this.fileList.values()];      
-      let filterArr=arr.filter(v=>{
+      let filterArr=arr.filter(v=>{        
         let type=v.name.split('.').slice(-1)[0];        
-        return this.fileType.includes(type);
+        return this.fileType.includes(type)&&v.size<=config.uploadMaxSize;
       });
       const th=this;
       const fds = filterArr.map(f => {
@@ -67,8 +69,15 @@ export default {
       }else if(filterArr.length<arr.length){
         this.$message.warning('检测到部分文件不合法，已过滤！');
       }
+      const loading = this.$loading({
+        lock: true,
+        text: '上传中...',
+        customClass:'test',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
       let promises=fds.map(fd =>post("/attachs/postAttachment",fd));
-      Promise.all(promises).then(res=>{
+      Promise.all(promises).then(res=>{        
         const errorArr=res.filter(r=>r.code!==1);
         if(errorArr.length>0){
           let msg='';
@@ -83,6 +92,8 @@ export default {
         this.clear();
       }).catch(error=>{
         console.error('上传附件错误!',error);
+      }).finally(()=>{
+        loading.close();
       });
     },
     clear(){
