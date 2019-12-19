@@ -50,7 +50,7 @@ class GeomService extends Service {
   async updateStatusForCountry (DB) {
     const sequelize = this.app.Sequelize;
     // const url = `select gid from country;`;
-    const url = `select cvt.gid as gid from country_village_tree cvt left join country c on cvt.id = c.gid where cvt.from_table = 'country' ;`
+    const url = `select cvt.gid as gid from country_village_tree cvt left join country c on cvt.id = cast(c.gid as text) where cvt.from_table = 'country' ;`
 
     const countryList = await this.ctx[DB].query(url, {
       type: sequelize.QueryTypes.SELECT
@@ -86,7 +86,7 @@ class GeomService extends Service {
   async getAllCountryStatusWeight (DB) {
     const sequelize = this.app.Sequelize;
     // const url = `select gid, xzqmc, ST_AsGeoJSON(geom) as geom from country;`;
-    const url = `select cvt.gid as gid, c.xzqmc as xzqmc, ST_AsGeoJSON(c.geom) as geom from country_village_tree cvt left join country c on cvt.id = c.gid where cvt.from_table = 'country' ;`
+    const url = `select cvt.gid as gid, c.xzqmc as xzqmc, ST_AsGeoJSON(c.geom) as geom from country_village_tree cvt left join country c on cvt.id = cast(c.gid as text) where cvt.from_table = 'country' ;`
     const countryList = await this.ctx[DB].query(url, {
       type: sequelize.QueryTypes.SELECT
     });
@@ -109,7 +109,7 @@ class GeomService extends Service {
       if (isNaN(percentage)) {
         percentage = 0
       }
-      percentage=percentage===0?0:percentage.toFixed(2)*1;
+       percentage=percentage===0?0:percentage.toFixed(2)*1;
       resultList.push({
         xzqmc,
         count: result.length,
