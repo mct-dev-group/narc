@@ -114,6 +114,7 @@ export default {
               file:file_name+'.'+file_type,              
             }];
           }else{
+            this.$message.error(`获取流程文件出错！`);
             throw new Error();
           }
         }).catch(error=>{
