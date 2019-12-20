@@ -289,6 +289,21 @@ class AttachmentsService extends Service {
       }
     );
   }
+
+  
+  /**
+   * 修改规划图斑状态
+   * @param {Number} gid
+   * @param {String} status - 状态
+   * @param {String} DB - 状态
+   */
+  async setStatus (uuid, status, DB) {
+    const sequelize = this.app.Sequelize;
+    const sql = `update plan set status = ${status} where uuid = '${uuid}'`;
+    return await this.ctx[DB].query(sql, {
+      type: sequelize.QueryTypes.SELECT
+    });
+  }
 }
 
 module.exports = AttachmentsService;

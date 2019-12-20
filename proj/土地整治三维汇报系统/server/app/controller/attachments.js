@@ -319,7 +319,7 @@ class AttachmentsController extends Controller {
             try {
               if (row !== '1') {
                 const result = await service.attachments.getStatusByUuid(uuid, DB);
-                // console.log(result);
+                if(!result[0]) throw `规划图斑${snum}. ${uuid} 不存在。`;
                 const reNumber = Number.parseInt(result[0].status);
                 if (reNumber !== m && reNumber !== n) {
                   throw `${snum}. ${uuid} 无法更改当前状态，当前状态为${reNumber}。`;
@@ -381,7 +381,7 @@ class AttachmentsController extends Controller {
               let attr;
               if (sheet1[ `D${row}` ]) attr = sheet1[ `D${row}` ].v;
               await service.attachments.postStep(step, uuid, null, gid, attr, DB);
-              await service.geom.setStatus(uuid, n, DB);
+              await service.attachments.setStatus(uuid, n, DB);
             }
           }
         }
@@ -405,7 +405,7 @@ class AttachmentsController extends Controller {
                   if (!attach_file_name) throw `未找到 ${key} 对应文件名`;
                   const file_bufs = await fsPromises.readFile(files_path + '/' + attach_file_name);
                   await service.attachments.postStep(step, uuid, attach_file_name, file_bufs, attr, DB);
-                  await service.geom.setStatus(uuid, n, DB);
+                  await service.attachments.setStatus(uuid, n, DB);
                 } catch (error) {
                   throw error;
                 }

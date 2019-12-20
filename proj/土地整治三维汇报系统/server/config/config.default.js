@@ -54,9 +54,9 @@ module.exports = appInfo => {
         database: 'qibin_db',
         username: 'postgres',
         password: 'admin',
-        // logging(...args){
+        logging(...args){
 
-        // },
+        },
         define: {
           timestamps: false,
         },
