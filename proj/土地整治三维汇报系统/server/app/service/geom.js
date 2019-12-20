@@ -6,12 +6,12 @@ const turf = require('turf');
 class GeomService extends Service {
   /**
    * 获取当前区域详细信息
-   * @param {Number} uuid - 对应表字段uuid
+   * @param {Number} gid - 对应表字段gid
    * @param {String} table - 对应表名
    */
-  async getCurrentAreaInfo (uuid , table, DB) {
+  async getCurrentAreaInfo (gid , table, DB) {
     const sequelize = this.app.Sequelize;
-    const sql = `select * from ${table} where uuid = ${uuid};`;
+    const sql = `select * from ${table} where gid = ${gid};`;
     return await this.ctx[DB].query(sql, {
       type: sequelize.QueryTypes.SELECT,
     });
@@ -19,12 +19,12 @@ class GeomService extends Service {
 
   /**
    * 修改规划图斑状态
-   * @param {Number} uuid
+   * @param {Number} gid
    * @param {String} status - 状态
    */
-  async setStatus (uuid, status, DB) {
+  async setStatus (gid, status, DB) {
     const sequelize = this.app.Sequelize;
-    const sql = `update plan set status = ${status} where uuid = ${uuid}`;
+    const sql = `update plan set status = ${status} where gid = ${gid}`;
     return await this.ctx[DB].query(sql, {
       type: sequelize.QueryTypes.SELECT
     });
@@ -50,7 +50,7 @@ class GeomService extends Service {
   async updateStatusForCountry (DB) {
     const sequelize = this.app.Sequelize;
     // const url = `select gid from country;`;
-    const url = `select cvt.gid as gid from country_village_tree cvt left join country c on cvt.id = cast(c.gid as text) where cvt.from_table = 'country' ;`
+    const url = `select cvt.gid as gid from country_village_tree cvt left join country c on cvt.id = c.gid where cvt.from_table = 'country' ;`
 
     const countryList = await this.ctx[DB].query(url, {
       type: sequelize.QueryTypes.SELECT
@@ -86,7 +86,7 @@ class GeomService extends Service {
   async getAllCountryStatusWeight (DB) {
     const sequelize = this.app.Sequelize;
     // const url = `select gid, xzqmc, ST_AsGeoJSON(geom) as geom from country;`;
-    const url = `select cvt.gid as gid, c.xzqmc as xzqmc, ST_AsGeoJSON(c.geom) as geom from country_village_tree cvt left join country c on cvt.id = cast(c.gid as text) where cvt.from_table = 'country' ;`
+    const url = `select cvt.gid as gid, c.xzqmc as xzqmc, ST_AsGeoJSON(c.geom) as geom from country_village_tree cvt left join country c on cvt.id = c.gid where cvt.from_table = 'country' ;`
     const countryList = await this.ctx[DB].query(url, {
       type: sequelize.QueryTypes.SELECT
     });
