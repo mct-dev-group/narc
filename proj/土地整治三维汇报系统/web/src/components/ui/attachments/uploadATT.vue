@@ -88,11 +88,11 @@ export default {
           this.$message.error(msg);
         }else{
           this.$message.success('上传成功!');
-        }        
-        this.clear();
+        }                
       }).catch(error=>{
         console.error('上传附件错误!',error);
       }).finally(()=>{
+        this.clear();
         loading.close();
       });
     },

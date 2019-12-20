@@ -60,8 +60,8 @@ export default {
       this.fileMap.clear();
       this.errors=[];
     },
-    handleChange(file,fileList,type){     
-      if(file.raw.type==='application/zip'){
+    handleChange(file,fileList,type){        
+      if(file.name.split(".").pop()==='zip'){
         if(file.size>config.uploadMaxSize){
           this.$message.error('文件大小不能超过'+config.uploadMaxSize/1024/1024+'M！');
           this.$refs[type][0].clearFiles();
@@ -69,7 +69,7 @@ export default {
         }
         this.fileMap.set(type,file.raw);
       }else{
-        this.$message.error('请选择文件格式为.zip的文件上传！');        
+        this.$message.error('请选择文件格式为.zip的文件上传！');
         this.$refs[type][0].clearFiles();
       }
     },
