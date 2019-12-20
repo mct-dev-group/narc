@@ -151,13 +151,30 @@ class AttachmentsController extends Controller {
     }
   }
 
-  async getStatus() {
+  async getStatusByUuid() {
+    const { ctx, service } = this;
+    const helper = ctx.helper;
+    const { uuid, DB } = this.ctx.query;
+    // console.log(gid, DB);
+    try {
+      const result = await service.attachments.getStatusByUuid(uuid, DB);
+      console.log(result[0]);
+      rb = helper.getSuccess(result[0]);
+    } catch (error) {
+      console.log(error);
+      rb = helper.getFailed(error);
+    } finally {
+      ctx.body = rb;
+    }
+  }
+
+  async getStatusByGid() {
     const { ctx, service } = this;
     const helper = ctx.helper;
     const { gid, DB } = this.ctx.query;
     // console.log(gid, DB);
     try {
-      const result = await service.attachments.getStatus(gid, DB);
+      const result = await service.attachments.getStatusByGid(gid, DB);
       console.log(result[0]);
       rb = helper.getSuccess(result[0]);
     } catch (error) {
@@ -294,22 +311,23 @@ class AttachmentsController extends Controller {
       if (!sheet1['!ref']) throw '成果汇总表excel文件不存在或为空';
       for (const key in sheet1) {
         if (sheet1.hasOwnProperty(key)) {
-          // B is gid
+          // B is uuid
           if (key.startsWith('B')) {
-            const { v: gid } = sheet1[key];
             const row = key.slice(1);
+            const { v: uuid } = sheet1[key];
+            const { v: snum } = sheet1[`A${row}`];
             try {
               if (row !== '1') {
-                const result = await service.attachments.getStatus(gid, DB);
+                const result = await service.attachments.getStatusByUuid(uuid, DB);
                 // console.log(result);
                 const reNumber = Number.parseInt(result[0].status);
                 if (reNumber !== m && reNumber !== n) {
-                  throw `${gid} 无法更改当前状态，当前状态为${reNumber}。`;
+                  throw `${snum}. ${uuid} 无法更改当前状态，当前状态为${reNumber}。`;
                 }
               }
             } catch (error) {
               console.log(error);
-              result.push({ gid, error });
+              result.push({ snum, uuid, error });
             }
           }
         }
@@ -339,7 +357,8 @@ class AttachmentsController extends Controller {
     const files = fs.readdirSync(files_path);
     let attach_file_name = sheet1.C2.v;
     const is2to3 = (m === 2 && n === 3);
-    let id;
+    let uuid, // 唯一标识
+        snum; // 序号
     try {
       if (is2to3) {
         if (!files.includes(attach_file_name)) throw `未找到文件 ${attach_file_name}`;
@@ -357,11 +376,12 @@ class AttachmentsController extends Controller {
           if (sheet1.hasOwnProperty(key) && key.startsWith('B')) {
             const row = key.slice(1);
             if (row !== '1') {
-              id = sheet1[ key ].v;
+              uuid = sheet1[ key ].v;
+              snum = sheet1[`A${row}`].v;
               let attr;
               if (sheet1[ `D${row}` ]) attr = sheet1[ `D${row}` ].v;
-              await service.attachments.postStep(step, id, null, gid, attr, DB);
-              await service.geom.setStatus(id, n, DB);
+              await service.attachments.postStep(step, uuid, null, gid, attr, DB);
+              await service.geom.setStatus(uuid, n, DB);
             }
           }
         }
@@ -369,22 +389,23 @@ class AttachmentsController extends Controller {
       } else {
         for (const key in sheet1) {
           if (sheet1.hasOwnProperty(key)) {
-            // B is gid
+            // B is uuid
             if (key.startsWith('B')) {
               const row = key.slice(1);
               if (row !== '1') {
                 try {
                   if (!files.includes(attach_file_name)) throw `未找到文件 ${attach_file_name}`;
-                  id = sheet1[ key ].v;
-                  if (!id) throw '图斑唯一标识为空';
+                  uuid = sheet1[ key ].v;
+                  snum = sheet1[`A${row}`].v;
+                  if (!uuid) throw '图斑唯一标识为空';
                   let attr;
                   if (sheet1[ `D${row}` ]) attr = sheet1[ `D${row}` ].v;
-                  if (!sheet1[ `C${row}` ]) throw `未找到 ${id} 对应文件名`;
+                  if (!sheet1[ `C${row}` ]) throw `未找到 ${uuid} 对应文件名`;
                   attach_file_name = sheet1[ `C${row}` ].v;
                   if (!attach_file_name) throw `未找到 ${key} 对应文件名`;
                   const file_bufs = await fsPromises.readFile(files_path + '/' + attach_file_name);
-                  await service.attachments.postStep(step, id, attach_file_name, file_bufs, attr, DB);
-                  await service.geom.setStatus(id, n, DB);
+                  await service.attachments.postStep(step, uuid, attach_file_name, file_bufs, attr, DB);
+                  await service.geom.setStatus(uuid, n, DB);
                 } catch (error) {
                   throw error;
                 }
@@ -395,7 +416,7 @@ class AttachmentsController extends Controller {
       }
     } catch (error) {
       console.log(3, error);
-      result.push({ id, error });
+      result.push({ snum, uuid, error });
     }
     if (result.length === 0) {
       return { code: 1, data: 'ok' };
@@ -508,7 +529,7 @@ class AttachmentsController extends Controller {
     const helper = ctx.helper;
     const id = this.ctx.params.id;
     const DB = this.ctx.params.DB;
-    const status = await service.attachments.getStatus(id, DB);
+    const status = await service.attachments.getStatusByGid(id, DB);
     try {
       let i = status[0].status;
       const result = [];
