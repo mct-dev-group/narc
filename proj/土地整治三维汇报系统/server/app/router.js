@@ -21,7 +21,8 @@ module.exports = app => {
     controller.attachments.delAttachmentById
   );
   router.get('/attachs/query', controller.attachments.query);
-  router.get('/attachs/getStatus', controller.attachments.getStatus);
+  router.get('/attachs/getStatusByUuid', controller.attachments.getStatusByUuid);
+  router.get('/attachs/getStatusByGid', controller.attachments.getStatusByGid);
 
   router.post('/attachs/postF1to2', controller.attachments.postF1to2);
   router.post('/attachs/postF2to3', controller.attachments.postF2to3);
