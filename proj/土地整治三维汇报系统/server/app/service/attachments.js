@@ -197,7 +197,7 @@ class AttachmentsService extends Service {
   async getAttachmentBySetpAndId(step, id, DB) {
     const sequelize = this.app.Sequelize;
     return await this.app[DB].query(
-      `select ${step}, ${step}_filename, ${step}_1, status from plan where uuid = ${id};`,
+      `select ${step}, ${step}_filename, ${step}_1, status from plan where uuid = '${id}';`,
       {
         type: sequelize.QueryTypes.SELECT,
       }
@@ -258,7 +258,7 @@ class AttachmentsService extends Service {
   // 所处状态查询
   async getStatus(gid, DB) {
     const sequelize = this.app.Sequelize;
-    const sql = `select status from plan where uuid = ${gid}`;
+    const sql = `select status from plan where uuid = '${gid}'`;
     return await this.app[DB].query(sql,
       {
         type: sequelize.QueryTypes.SELECT,
@@ -269,7 +269,7 @@ class AttachmentsService extends Service {
 
   async getF2to3(gid, DB) {
     const sequelize = this.app.Sequelize;
-    const sql = `select f2to3, f2to3_1 from plan where uuid = ${gid}`;
+    const sql = `select f2to3, f2to3_1 from plan where uuid = '${gid}'`;
     return await this.app[DB].query(sql,
       {
         type: sequelize.QueryTypes.SELECT,
