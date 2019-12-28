@@ -4,8 +4,14 @@
       <el-row v-for="(item,index) of attachments" :key='index'>
         <el-col v-for="(val,i) of item" :key='i' :span="8">
           <el-card shadow='hover' :body-style="{padding:0}" >
-            <img :src="val.url" :alt="val.name" :title="val.name" class="imgATT" @click="openInNewtab(val.url)">
-            <a class="fileLink" @click="openInNewtab(val.url)" :title='val.name'>{{val.name}}</a>
+            <div v-if="/^image\//ig.test(val.mime_type)">
+              <img :src="val.url" :alt="val.name" :title="val.name" class="fileView" @click="viewFile(val.mime_type,val.url,val.name)">
+            </div>
+            <div v-else>
+              <i class="fileView" :class="getIcon(val.file_type)" @click="viewFile(val.mime_type,val.url,val.name)"></i>
+            </div>
+            <div></div>            
+            <a class="fileLink" @click="viewFile(val.mime_type,val.url,val.name)" :title='val.name'>{{val.name}}</a>
           </el-card>          
         </el-col>
       </el-row>      
@@ -17,6 +23,7 @@
 <script>
 import {get} from '@/utils/fetch';
 import {arr1Dto2D} from '@/utils/common';
+import { url } from 'inspector';
 
 export default {
   name: 'checkATT',
@@ -31,10 +38,13 @@ export default {
       if(this.files){
         let files=this.files.filter(file=>![...config.spotStatusChange.keys()].includes(file.attach_type));
         let arr=files.map(f=>{
-          const {file_name,file_type,mime_type, blob_data} = f;
+          const {file_name,file_type,mime_type, blob_data} = f;          
           return {
             name:file_name+'.'+file_type,
-            url:`data:${mime_type};base64,` + blob_data
+            // url:`data:${mime_type};base64,` + blob_data,
+            url:blob_data,
+            file_type:file_type,
+            mime_type:mime_type
           }
         });
         
@@ -45,23 +55,59 @@ export default {
       }
     }
   },
-  methods: {
-    handleFileClick(gid){
-      get("/attachs/getAttachmentById/"+gid+"/"+this.DB).then(res=>{
-        const {mime_type, blob_data} = res.data[0];
-        const bolbUrl=`data:${mime_type};base64,` + blob_data;
-        openInNewtab(bolbUrl);
-      });
-    },
-    openInNewtab(dataURL){
-      const iframe =
-        "<iframe width='100%' height='100%' style='border:none;' src='" + dataURL + "'></iframe>";
-      let x = window.open();
+  methods: {   
+    viewFile(type,dataURL,name){
+      if(/^image\//ig.test(type)){
+        const iframe =
+          "<iframe width='100%' height='100%' style='border:none;' src='" + dataURL + "'></iframe>";
+        let x = window.open();
 
-      x.document.open();
-      x.document.write(iframe);
-      x.document.body.style.margin=0;
-      x.document.close();
+        x.document.open();
+        x.document.write(iframe);
+        x.document.body.style.margin=0;
+        x.document.close();
+      }else{
+        //download        
+        var eleLink = document.createElement('a');
+        eleLink.download = name;
+        eleLink.style.display = 'none';
+        // let blob = new Blob([dataURL]);
+        // eleLink.href =URL.createObjectURL(blob);
+        // let blob = new Blob([dataURL]);
+        eleLink.href =URL.createObjectURL(dataURL);
+        // 触发点击
+        document.body.appendChild(eleLink);
+        eleLink.click();        
+        document.body.removeChild(eleLink);
+        
+      }
+      
+    },
+    getIcon(type){
+      let result='fa fa-';
+      switch(type){
+        case 'xls':
+        case 'xlsx':
+          result+='file-excel-o';
+          break;
+        case 'doc':
+        case 'docx':
+          result+='file-word-o';
+          break;
+        case 'zip':
+        case 'rar':
+          result+='file-archive-o';
+          break;
+        case 'txt':
+          result+='file-text-o';
+          break;
+        case 'pdf':
+          result+='file-pdf-o';
+          break;
+        default :
+          result+='file-o';
+      }
+      return result;
     }
   }
 }
@@ -81,12 +127,17 @@ export default {
     .el-card{
       cursor: pointer;
 
-      .imgATT{
+      .fileView{
         display: block;
         width: 100%;
         height: 160px;
       }
-
+      i.fileView{
+        box-sizing: border-box;             
+        font-size: 150px;
+        text-align: center;
+        padding: 5px;
+      }
         
     }
   } 
