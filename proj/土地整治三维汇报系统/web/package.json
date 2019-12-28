@@ -13,7 +13,6 @@
     "echarts": "^4.3.0",
     "element-ui": "^2.11.1",
     "font-awesome": "^4.7.0",
-    "inspector": "^0.5.0",
     "js-pinyin": "^0.1.9",
     "qs": "^6.8.0",
     "turf": "^3.0.14",

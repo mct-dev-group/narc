@@ -31,6 +31,14 @@ const qbServices={
       {
         title: '规划斑点',
         value: 'qibin:plan'
+      },
+      {
+        title: '地类图斑',
+        value: 'qibin:DLTB'
+      },
+      {
+        title: '已整治',
+        value: 'qibin:yzz'
       }
     ]
   },

@@ -23,7 +23,6 @@
 <script>
 import {get} from '@/utils/fetch';
 import {arr1Dto2D} from '@/utils/common';
-import { url } from 'inspector';
 
 export default {
   name: 'checkATT',

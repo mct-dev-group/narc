@@ -264,7 +264,7 @@ function drawOverviewChart(id){
 .layerControl {
   background: white;
   width: 250px;
-  height: 300px;
+  // height: 300px;
   position: absolute;
   right: 30px;
   top: 64px;
