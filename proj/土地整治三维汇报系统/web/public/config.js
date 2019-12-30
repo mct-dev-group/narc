@@ -37,7 +37,7 @@ const qbServices={
         value: 'qibin:DLTB'
       },
       {
-        title: '已整治',
+        title: '历年整治图斑',
         value: 'qibin:yzz'
       }
     ]
