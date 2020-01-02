@@ -207,7 +207,7 @@ class AttachmentsService extends Service {
   async getThumbnailBySetpAndId(step, id, DB) {
     const sequelize = this.app.Sequelize;
     return await this.app[DB].query(
-      `select ${step}_thumbnail, ${step}_thumbnailname from plan where gid = ${id};`,
+      `select ${step}_thumbnail, ${step}_thumbnailname, status from plan where gid = ${id};`,
       {
         type: sequelize.QueryTypes.SELECT,
       }
