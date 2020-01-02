@@ -68,7 +68,7 @@ class AttachmentsService extends Service {
     await this.app[DB].query(insert_spot, {
       type: sequelize.QueryTypes.INSERT,
     });
-    return await this.app[DB].query(`select * from country_village_tree`, {
+    return await this.app[DB].query('select * from country_village_tree', {
       type: sequelize.QueryTypes.SELECT,
     });
   }
@@ -204,6 +204,16 @@ class AttachmentsService extends Service {
     );
   }
 
+  async getThumbnailBySetpAndId(step, id, DB) {
+    const sequelize = this.app.Sequelize;
+    return await this.app[DB].query(
+      `select ${step}_thumbnail, ${step}_thumbnailname from plan where gid = ${id};`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+  }
+
   async delAttachmentById(id, DB) {
     const sequelize = this.app.Sequelize;
     await this.app[DB].query(
@@ -236,18 +246,21 @@ class AttachmentsService extends Service {
   }
 
   // 状态变更
-  async postStep(step, id, fileName, bufs, attr = null, DB) {
+  async postStep(step, id, fileName, bufs, thumbBufs, thumb_bufs_name, attr = null, DB) {
     const sequelize = this.app.Sequelize;
+    const replace = (thumb_bufs_name && thumbBufs) ? [ bufs, thumb_bufs_name, thumbBufs ] : [ bufs ];
     try {
       const sql = `update plan set 
       ${step}= (?) 
+      ${thumb_bufs_name ? `, ${step}_thumbnailname= (?)` : ''} 
+      ${thumb_bufs_name ? `, ${step}_thumbnail= (?)` : ''} 
       ${fileName ? `, ${step}_filename='${fileName}'` : ''}
       ${attr ? `, ${step}_1='${attr}'` : ''} 
       where uuid = '${id}';`;
       return await await this.app[DB].query(
         sql,
         {
-          replacements: [ bufs ],
+          replacements: replace,
           type: sequelize.QueryTypes.UPDATE,
         });
     } catch (error) {
@@ -267,17 +280,17 @@ class AttachmentsService extends Service {
     );
   }
 
-    // 所处状态查询
-    async getStatusByGid(gid, DB) {
-      const sequelize = this.app.Sequelize;
-      const sql = `select status from plan where gid = '${gid}'`;
-      return await this.app[DB].query(sql,
-        {
-          type: sequelize.QueryTypes.SELECT,
-          replacements: {},
-        }
-      );
-    }
+  // 所处状态查询
+  async getStatusByGid(gid, DB) {
+    const sequelize = this.app.Sequelize;
+    const sql = `select status from plan where gid = '${gid}'`;
+    return await this.app[DB].query(sql,
+      {
+        type: sequelize.QueryTypes.SELECT,
+        replacements: {},
+      }
+    );
+  }
 
   async getF2to3(gid, DB) {
     const sequelize = this.app.Sequelize;
@@ -290,18 +303,18 @@ class AttachmentsService extends Service {
     );
   }
 
-  
+
   /**
    * 修改规划图斑状态
-   * @param {Number} gid
+   * @param {Number} uuid
    * @param {String} status - 状态
    * @param {String} DB - 状态
    */
-  async setStatus (uuid, status, DB) {
+  async setStatus(uuid, status, DB) {
     const sequelize = this.app.Sequelize;
     const sql = `update plan set status = ${status} where uuid = '${uuid}'`;
     return await this.ctx[DB].query(sql, {
-      type: sequelize.QueryTypes.SELECT
+      type: sequelize.QueryTypes.SELECT,
     });
   }
 }

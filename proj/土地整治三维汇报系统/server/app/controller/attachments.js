@@ -276,8 +276,8 @@ class AttachmentsController extends Controller {
     const {
       file_name,
       file_type,
-      attach_type,
-      attach_to_id,
+      // attach_type,
+      // attach_to_id,
       DB,
     } = stream.fields;
     stream.on('data', d => {
@@ -299,7 +299,7 @@ class AttachmentsController extends Controller {
       });
       const getBuf = await end;
       const buf = await getBuf(); // Buffer.concat(bufs);
-      await this.service.attachments.postAttachment(file_name, file_type, buf, attach_to_id, attach_type, DB);
+      // await this.service.attachments.postAttachment(file_name, file_type, buf, attach_to_id, attach_type, DB);
       await fsPromises.writeFile(zip_file_path, buf);
       await fsPromises.mkdir(unzip_temp_path);
       const files_path = unzip(zip_file_path, unzip_temp_path);
@@ -319,7 +319,7 @@ class AttachmentsController extends Controller {
             try {
               if (row !== '1') {
                 const result = await service.attachments.getStatusByUuid(uuid, DB);
-                if(!result[0]) throw `规划图斑${snum}. ${uuid} 不存在。`;
+                if (!result[0]) throw `规划图斑${snum}. ${uuid} 不存在。`;
                 const reNumber = Number.parseInt(result[0].status);
                 if (reNumber !== m && reNumber !== n) {
                   throw `${snum}. ${uuid} 无法更改当前状态，当前状态为${reNumber}。`;
@@ -356,9 +356,10 @@ class AttachmentsController extends Controller {
     const sheet1 = workbook.Sheets[ workbook.SheetNames[0] ];
     const files = fs.readdirSync(files_path);
     let attach_file_name = sheet1.C2.v;
+    let thumb_bufs_name = sheet1.D2.v;
     const is2to3 = (m === 2 && n === 3);
     let uuid, // 唯一标识
-        snum; // 序号
+      snum; // 序号
     try {
       if (is2to3) {
         if (!files.includes(attach_file_name)) throw `未找到文件 ${attach_file_name}`;
@@ -378,9 +379,15 @@ class AttachmentsController extends Controller {
             if (row !== '1') {
               uuid = sheet1[ key ].v;
               snum = sheet1[`A${row}`].v;
+              thumb_bufs_name = sheet1[ `D${row}` ].v;
               let attr;
-              if (sheet1[ `D${row}` ]) attr = sheet1[ `D${row}` ].v;
-              await service.attachments.postStep(step, uuid, null, gid, attr, DB);
+              if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v;
+              let thumb_bufs = null;
+              if (thumb_bufs_name) {
+                if (!files.includes(thumb_bufs_name)) throw `未找到缩略图${thumb_bufs_name}`;
+                thumb_bufs = await fsPromises.readFile(files_path + '/' + thumb_bufs_name);
+              }
+              await service.attachments.postStep(step, uuid, null, gid, thumb_bufs, thumb_bufs_name, attr, DB);
               await service.attachments.setStatus(uuid, n, DB);
             }
           }
@@ -399,12 +406,18 @@ class AttachmentsController extends Controller {
                   snum = sheet1[`A${row}`].v;
                   if (!uuid) throw '图斑唯一标识为空';
                   let attr;
-                  if (sheet1[ `D${row}` ]) attr = sheet1[ `D${row}` ].v;
+                  if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v;
                   if (!sheet1[ `C${row}` ]) throw `未找到 ${uuid} 对应文件名`;
                   attach_file_name = sheet1[ `C${row}` ].v;
+                  thumb_bufs_name = sheet1[ `D${row}` ].v;
                   if (!attach_file_name) throw `未找到 ${key} 对应文件名`;
+                  let thumb_bufs = null;
                   const file_bufs = await fsPromises.readFile(files_path + '/' + attach_file_name);
-                  await service.attachments.postStep(step, uuid, attach_file_name, file_bufs, attr, DB);
+                  if (thumb_bufs_name) {
+                    if (!files.includes(thumb_bufs_name)) throw `未找到缩略图${thumb_bufs_name}`;
+                    thumb_bufs = await fsPromises.readFile(files_path + '/' + thumb_bufs_name);
+                  }
+                  await service.attachments.postStep(step, uuid, attach_file_name, file_bufs, thumb_bufs, thumb_bufs_name, attr, DB);
                   await service.attachments.setStatus(uuid, n, DB);
                 } catch (error) {
                   throw error;
@@ -477,6 +490,9 @@ class AttachmentsController extends Controller {
     try {
       if (m === 2 && n === 3) {
         const { id, DB } = this.ctx.params;
+        const thumbnail = await service.attachments.getThumbnailBySetpAndId(step, id, DB);
+        const thumbnail_buf = thumbnail[0][`${step}_thumbnail`];
+        const thumbnail_name = thumbnail[0][`${step}_thumbnailname`];
         const attachId = await this.service.attachments.getF2to3(id, DB);
         const attaId = attachId[0].f2to3;
         const attr = attachId[0].f2to3_1;
@@ -488,9 +504,32 @@ class AttachmentsController extends Controller {
         result[0].attr = attr;
         result[0].blob_data = bufferBase64;
         result[0].step = `F${m}to${n}`;
+        if (thumbnail_name) {
+          const thumbnail_buf_buffer = Buffer.from(thumbnail_buf, 'binary');
+          const thumbnailBase64 = thumbnail_buf_buffer.toString('base64');
+          const thumbnail_file_name = getFileName(thumbnail_name);
+          const thumbnail_file_type = getFileType(thumbnail_name);
+          result[0].thumbnail = thumbnailBase64;
+          result[0].thumbnail_name = thumbnail_file_name;
+          result[0].thumbnail_tyoe = thumbnail_file_type;
+        }
         if (isAll) return result[0];
         rb = helper.getSuccess(result[0]);
         return;
+      }
+      const thumbnail = await service.attachments.getThumbnailBySetpAndId(step, id, DB);
+      
+      const thumbnail_buf = thumbnail[0][`${step}_thumbnail`];
+      const thumbnail_name = thumbnail[0][`${step}_thumbnailname`];
+      console.log({ thumbnail });
+      if (thumbnail_name) {
+        const thumbnail_buf_buffer = Buffer.from(thumbnail_buf, 'binary');
+        const thumbnailBase64 = thumbnail_buf_buffer.toString('base64');
+        const thumbnail_file_name = getFileName(thumbnail_name);
+        const thumbnail_file_type = getFileType(thumbnail_name);
+        res.thumbnail = thumbnailBase64;
+        res.thumbnail_name = thumbnail_file_name;
+        res.thumbnail_tyoe = thumbnail_file_type;
       }
       const result = await service.attachments.getAttachmentBySetpAndId(step, id, DB);
       console.log(result);
@@ -500,7 +539,7 @@ class AttachmentsController extends Controller {
       const attr = result[0][`${step}_1`];
       const file_name = getFileName(file_full_name);
       const file_type = getFileType(file_full_name);
-      const blob_data = result[0][`${step}`]
+      const blob_data = result[0][`${step}`];
       const buffer = Buffer.from(blob_data, 'binary');
       const bufferBase64 = buffer.toString('base64');
       res.file_name = file_name;
@@ -544,7 +583,7 @@ class AttachmentsController extends Controller {
       console.log(error);
       rb = helper.getFailed(error);
     } finally {
-      console.log('rb');
+      console.log(rb);
       ctx.body = rb;
     }
   }
