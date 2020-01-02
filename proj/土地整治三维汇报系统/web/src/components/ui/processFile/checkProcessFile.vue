@@ -33,13 +33,18 @@ export default {
   methods: {
     handleProcessFileClick(gid,file_name){      
       get("/attachs/getAttachmentById/"+gid+"/"+this.DB).then(res=>{
-        const {mime_type, blob_data} = res.data[0];
-        const bolbUrl=`data:${mime_type};base64,` + blob_data;
-        //download        
+        const {mime_type, blob_data} = res.data[0];        
+        //download
         var eleLink = document.createElement('a');
         eleLink.download = file_name;
         eleLink.style.display = 'none';
-        eleLink.href = bolbUrl;
+        // base64 to blob
+        let bytes = atob(blob_data),n = bytes.length,byteArray = new Uint8Array(n);
+        while (n--) {
+          byteArray[n] = bytes.charCodeAt(n);
+        }
+        const blob = new Blob([byteArray],{type : mime_type});
+        eleLink.href =URL.createObjectURL(blob);
         // 触发点击
         document.body.appendChild(eleLink);
         eleLink.click();        

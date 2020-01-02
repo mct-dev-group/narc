@@ -5,13 +5,13 @@
         <el-col v-for="(val,i) of item" :key='i' :span="8">
           <el-card shadow='hover' :body-style="{padding:0}" >
             <div v-if="/^image\//ig.test(val.mime_type)">
-              <img :src="val.url" :alt="val.name" :title="val.name" class="fileView" @click="viewFile(val.mime_type,val.url,val.name)">
+              <img :src="val.url" :alt="val.name" :title="val.name" class="fileView" @click="viewFile(val.mime_type,val.blob_data,val.name)">
             </div>
             <div v-else>
-              <i class="fileView" :class="getIcon(val.file_type)" @click="viewFile(val.mime_type,val.url,val.name)"></i>
+              <i class="fileView" :class="getIcon(val.file_type)" @click="viewFile(val.mime_type,val.blob_data,val.name)"></i>
             </div>
             <div></div>            
-            <a class="fileLink" @click="viewFile(val.mime_type,val.url,val.name)" :title='val.name'>{{val.name}}</a>
+            <a class="fileLink" @click="viewFile(val.mime_type,val.blob_data,val.name)" :title='val.name'>{{val.name}}</a>
           </el-card>          
         </el-col>
       </el-row>      
@@ -40,8 +40,8 @@ export default {
           const {file_name,file_type,mime_type, blob_data} = f;          
           return {
             name:file_name+'.'+file_type,
-            // url:`data:${mime_type};base64,` + blob_data,
-            url:blob_data,
+            url:`data:${mime_type};base64,` + blob_data,
+            blob_data:blob_data,
             file_type:file_type,
             mime_type:mime_type
           }
@@ -57,12 +57,10 @@ export default {
   methods: {   
     viewFile(type,dataURL,name){
       if(/^image\//ig.test(type)){
-        const iframe =
-          "<iframe width='100%' height='100%' style='border:none;' src='" + dataURL + "'></iframe>";
-        let x = window.open();
-
-        x.document.open();
-        x.document.write(iframe);
+        const url=`data:${type};base64,` + dataURL;
+        const img ="<img  style='border:none;height:100%;' src='" + url + "'/>";
+        let x = window.open();        
+        x.document.write(img);
         x.document.body.style.margin=0;
         x.document.close();
       }else{
@@ -70,15 +68,20 @@ export default {
         var eleLink = document.createElement('a');
         eleLink.download = name;
         eleLink.style.display = 'none';
-        // let blob = new Blob([dataURL]);
-        // eleLink.href =URL.createObjectURL(blob);
-        // let blob = new Blob([dataURL]);
-        eleLink.href =URL.createObjectURL(dataURL);
+        // 将base64解码
+        var bytes = atob(dataURL);
+        let n = bytes.length;        
+        var byteArray = new Uint8Array(n);
+        while (n--) {
+          byteArray[n] = bytes.charCodeAt(n);
+        }
+        let blob = new Blob([byteArray],{type : type});
+        eleLink.href =URL.createObjectURL(blob);
         // 触发点击
         document.body.appendChild(eleLink);
-        eleLink.click();        
-        document.body.removeChild(eleLink);
-        
+        eleLink.click();
+        URL.revokeObjectURL(eleLink.href);
+        document.body.removeChild(eleLink);        
       }
       
     },
