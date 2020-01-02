@@ -491,6 +491,7 @@ class AttachmentsController extends Controller {
       if (m === 2 && n === 3) {
         const { id, DB } = this.ctx.params;
         const thumbnail = await service.attachments.getThumbnailBySetpAndId(step, id, DB);
+        const status = thumbnail[0].status;
         const thumbnail_buf = thumbnail[0][`${step}_thumbnail`];
         const thumbnail_name = thumbnail[0][`${step}_thumbnailname`];
         const attachId = await this.service.attachments.getF2to3(id, DB);
@@ -504,6 +505,7 @@ class AttachmentsController extends Controller {
         result[0].attr = attr;
         result[0].blob_data = bufferBase64;
         result[0].step = `F${m}to${n}`;
+        result[0].status = status;
         if (thumbnail_name) {
           const thumbnail_buf_buffer = Buffer.from(thumbnail_buf, 'binary');
           const thumbnailBase64 = thumbnail_buf_buffer.toString('base64');
@@ -521,7 +523,6 @@ class AttachmentsController extends Controller {
       
       const thumbnail_buf = thumbnail[0][`${step}_thumbnail`];
       const thumbnail_name = thumbnail[0][`${step}_thumbnailname`];
-      console.log({ thumbnail });
       if (thumbnail_name) {
         const thumbnail_buf_buffer = Buffer.from(thumbnail_buf, 'binary');
         const thumbnailBase64 = thumbnail_buf_buffer.toString('base64');
@@ -532,7 +533,7 @@ class AttachmentsController extends Controller {
         res.thumbnail_tyoe = thumbnail_file_type;
       }
       const result = await service.attachments.getAttachmentBySetpAndId(step, id, DB);
-      console.log(result);
+      // console.log(result);
       const file_full_name = result[0][`${step}_filename`];
       if (!file_full_name) throw '没有上传文件';
       const status = result[0].status;
@@ -550,7 +551,6 @@ class AttachmentsController extends Controller {
       res.mime_type = mime.lookup(file_type);
       res.blob_data = bufferBase64;
       if (isAll) return res;
-      console.log(res);
       rb = helper.getSuccess(res);
     } catch (error) {
       console.log(error);
@@ -583,7 +583,7 @@ class AttachmentsController extends Controller {
       console.log(error);
       rb = helper.getFailed(error);
     } finally {
-      console.log(rb);
+      // console.log(rb);
       ctx.body = rb;
     }
   }
