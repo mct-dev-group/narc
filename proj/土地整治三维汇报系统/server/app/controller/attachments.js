@@ -513,14 +513,13 @@ class AttachmentsController extends Controller {
           const thumbnail_file_type = getFileType(thumbnail_name);
           result[0].thumbnail = thumbnailBase64;
           result[0].thumbnail_name = thumbnail_file_name;
-          result[0].thumbnail_tyoe = thumbnail_file_type;
+          result[0].thumbnail_type = thumbnail_file_type;
         }
         if (isAll) return result[0];
         rb = helper.getSuccess(result[0]);
         return;
       }
       const thumbnail = await service.attachments.getThumbnailBySetpAndId(step, id, DB);
-      
       const thumbnail_buf = thumbnail[0][`${step}_thumbnail`];
       const thumbnail_name = thumbnail[0][`${step}_thumbnailname`];
       if (thumbnail_name) {
@@ -530,7 +529,7 @@ class AttachmentsController extends Controller {
         const thumbnail_file_type = getFileType(thumbnail_name);
         res.thumbnail = thumbnailBase64;
         res.thumbnail_name = thumbnail_file_name;
-        res.thumbnail_tyoe = thumbnail_file_type;
+        res.thumbnail_type = thumbnail_file_type;
       }
       const result = await service.attachments.getAttachmentBySetpAndId(step, id, DB);
       // console.log(result);
