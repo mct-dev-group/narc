@@ -276,8 +276,8 @@ class AttachmentsController extends Controller {
     const {
       file_name,
       file_type,
-      // attach_type,
-      // attach_to_id,
+      attach_type,
+      attach_to_id,
       DB,
     } = stream.fields;
     stream.on('data', d => {
@@ -299,7 +299,7 @@ class AttachmentsController extends Controller {
       });
       const getBuf = await end;
       const buf = await getBuf(); // Buffer.concat(bufs);
-      // await this.service.attachments.postAttachment(file_name, file_type, buf, attach_to_id, attach_type, DB);
+      await this.service.attachments.postAttachment(file_name, file_type, buf, attach_to_id, attach_type, DB);
       await fsPromises.writeFile(zip_file_path, buf);
       await fsPromises.mkdir(unzip_temp_path);
       const files_path = unzip(zip_file_path, unzip_temp_path);
