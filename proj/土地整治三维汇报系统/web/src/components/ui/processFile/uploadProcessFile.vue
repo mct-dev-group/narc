@@ -115,6 +115,7 @@ export default {
             throw new Error('图层更新出错！');
           }
         }).catch(error=>{
+          this.$message.error('服务出错！');
           console.error(error);
         }).finally(()=>{
           loading.close();

@@ -118,17 +118,16 @@ export default {
       this.imgSrc='';
       this.imgLoading=false;
     },
-    checkExtendProps(status){
-      this.imgSrc='';
+    checkExtendProps(status){      
       if(status>1){
         this.imgLoading=true;
         get(`/attachs/getF${status-1}to${status}Attach/${this.details.gid}/${this.DB}`).then(res=>{
           if(res.code===1){            
             const data=res.data;
-            const {mime_type,blob_data,file_name,file_type,thumbnail_type} = data;            
+            const {mime_type,blob_data,file_name,file_type,thumbnail_type,thumbnail} = data;            
             this.bolbUrl=[blob_data,mime_type];
             this.fileProp=file_name+'.'+file_type;
-            this.imgSrc=`data:image/${thumbnail_type};base64,` + data.thumbnail;
+            this.imgSrc=(thumbnail_type&&thumbnail)?`data:image/${thumbnail_type};base64,` +thumbnail:'';
             this.imgLoading=false;
           }else{
             this.$message.error(`获取流程文件出错！`);
