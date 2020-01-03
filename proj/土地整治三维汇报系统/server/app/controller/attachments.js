@@ -356,7 +356,7 @@ class AttachmentsController extends Controller {
     const sheet1 = workbook.Sheets[ workbook.SheetNames[0] ];
     const files = fs.readdirSync(files_path);
     let attach_file_name = sheet1.C2.v;
-    let thumb_bufs_name = sheet1.D2.v;
+    let thumb_name = sheet1.D2 ? sheet1.D2.v : null;
     const is2to3 = (m === 2 && n === 3);
     let uuid, // 唯一标识
       snum; // 序号
@@ -368,10 +368,23 @@ class AttachmentsController extends Controller {
         const file_name = splitname;
         const file_bufs = await fsPromises.readFile(files_path + '/' + attach_file_name);
         const ranId = randomNegNumber();
-        await service.attachments.insertArrtach(file_name, file_type, ranId, file_bufs, null, DB);
+        const ranId2 = randomNegNumber();
+        await service.attachments.insertAttach(file_name, file_type, ranId, file_bufs, null, DB);
         // console.log(1, ranId);
         const attach_gid = await service.attachments.getAttachGidById(ranId, DB);
-        const { gid } = attach_gid[0];
+        const { gid: gid1 } = attach_gid[0];
+        let gid2 = null;
+        if (thumb_name) {
+          let thumb_bufs = null;
+          if (!files.includes(thumb_name)) throw `未找到缩略图${thumb_name}`;
+          thumb_bufs = await fsPromises.readFile(files_path + '/' + thumb_name);
+          const splitname = thumb_name.split('.');
+          const file_type = splitname.pop();
+          const file_name = splitname;
+          await service.attachments.insertAttach(file_name, file_type, ranId2, thumb_bufs, null, DB);
+          const attach_gid = await service.attachments.getAttachGidById(ranId2, DB);
+          gid2 = attach_gid[0];
+        }
         // console.log(2, gid);
         for (const key in sheet1) {
           if (sheet1.hasOwnProperty(key) && key.startsWith('B')) {
@@ -379,20 +392,16 @@ class AttachmentsController extends Controller {
             if (row !== '1') {
               uuid = sheet1[ key ].v;
               snum = sheet1[`A${row}`].v;
-              thumb_bufs_name = sheet1[ `D${row}` ].v;
+              // thumb_name = sheet1[ `D${row}` ].v;
               let attr;
               if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v;
-              let thumb_bufs = null;
-              if (thumb_bufs_name) {
-                if (!files.includes(thumb_bufs_name)) throw `未找到缩略图${thumb_bufs_name}`;
-                thumb_bufs = await fsPromises.readFile(files_path + '/' + thumb_bufs_name);
-              }
-              await service.attachments.postStep(step, uuid, null, gid, thumb_bufs, thumb_bufs_name, attr, DB);
+              await service.attachments.postStep(step, uuid, null, gid1, gid2, null, attr, DB);
               await service.attachments.setStatus(uuid, n, DB);
             }
           }
         }
         await service.attachments.updateAttachGidById(ranId, -1, DB);
+        await service.attachments.updateAttachGidById(ranId2, -1, DB);
       } else {
         for (const key in sheet1) {
           if (sheet1.hasOwnProperty(key)) {
@@ -409,15 +418,15 @@ class AttachmentsController extends Controller {
                   if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v;
                   if (!sheet1[ `C${row}` ]) throw `未找到 ${uuid} 对应文件名`;
                   attach_file_name = sheet1[ `C${row}` ].v;
-                  thumb_bufs_name = sheet1[ `D${row}` ].v;
+                  thumb_name = sheet1[ `D${row}` ].v;
                   if (!attach_file_name) throw `未找到 ${key} 对应文件名`;
                   let thumb_bufs = null;
                   const file_bufs = await fsPromises.readFile(files_path + '/' + attach_file_name);
-                  if (thumb_bufs_name) {
-                    if (!files.includes(thumb_bufs_name)) throw `未找到缩略图${thumb_bufs_name}`;
-                    thumb_bufs = await fsPromises.readFile(files_path + '/' + thumb_bufs_name);
+                  if (thumb_name) {
+                    if (!files.includes(thumb_name)) throw `未找到缩略图${thumb_name}`;
+                    thumb_bufs = await fsPromises.readFile(files_path + '/' + thumb_name);
                   }
-                  await service.attachments.postStep(step, uuid, attach_file_name, file_bufs, thumb_bufs, thumb_bufs_name, attr, DB);
+                  await service.attachments.postStep(step, uuid, attach_file_name, file_bufs, thumb_bufs, thumb_name, attr, DB);
                   await service.attachments.setStatus(uuid, n, DB);
                 } catch (error) {
                   throw error;
@@ -490,12 +499,11 @@ class AttachmentsController extends Controller {
     try {
       if (m === 2 && n === 3) {
         const { id, DB } = this.ctx.params;
-        const thumbnail = await service.attachments.getThumbnailBySetpAndId(step, id, DB);
-        const status = thumbnail[0].status;
-        const thumbnail_buf = thumbnail[0][`${step}_thumbnail`];
-        const thumbnail_name = thumbnail[0][`${step}_thumbnailname`];
         const attachId = await this.service.attachments.getF2to3(id, DB);
+        let status = await this.service.attachments.getStatusByGid(id, DB);
+        status = status[0].status;
         const attaId = attachId[0].f2to3;
+        const thumbAttaId = attachId[0].f2to3_thumbnail;
         const attr = attachId[0].f2to3_1;
         const result = await service.attachments.getAttachmentById(attaId, DB);
         const { file_type, blob_data } = result[0];
@@ -506,14 +514,15 @@ class AttachmentsController extends Controller {
         result[0].blob_data = bufferBase64;
         result[0].step = `F${m}to${n}`;
         result[0].status = status;
-        if (thumbnail_name) {
-          const thumbnail_buf_buffer = Buffer.from(thumbnail_buf, 'binary');
+        if (thumbAttaId) {
+          const thumbnail = await service.attachments.getAttachmentById(attaId, DB);
+          const { file_type, blob_data, file_name } = thumbnail[0];
+          const thumbnail_buf_buffer = Buffer.from(blob_data, 'binary');
           const thumbnailBase64 = thumbnail_buf_buffer.toString('base64');
-          const thumbnail_file_name = getFileName(thumbnail_name);
-          const thumbnail_file_type = getFileType(thumbnail_name);
+          result[0].thumbnail_mime_type = mime.lookup(file_type);
           result[0].thumbnail = thumbnailBase64;
-          result[0].thumbnail_name = thumbnail_file_name;
-          result[0].thumbnail_type = thumbnail_file_type;
+          result[0].thumbnail_name = file_name;
+          result[0].thumbnail_type = file_type;
         }
         if (isAll) return result[0];
         rb = helper.getSuccess(result[0]);
@@ -527,6 +536,7 @@ class AttachmentsController extends Controller {
         const thumbnailBase64 = thumbnail_buf_buffer.toString('base64');
         const thumbnail_file_name = getFileName(thumbnail_name);
         const thumbnail_file_type = getFileType(thumbnail_name);
+        res.thumbnail_mime_type = mime.lookup(thumbnail_file_type);
         res.thumbnail = thumbnailBase64;
         res.thumbnail_name = thumbnail_file_name;
         res.thumbnail_type = thumbnail_file_type;

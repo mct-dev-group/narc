@@ -131,7 +131,7 @@ class AttachmentsService extends Service {
     return { file_name, file_type, attach_to_id, attach_type, DB };
   }
 
-  async insertArrtach(file_name, file_type, attach_to_id, bufs, attach_type = null, DB) {
+  async insertAttach(file_name, file_type, attach_to_id, bufs, attach_type = null, DB) {
     const sequelize = this.app.Sequelize;
     const sql = 'insert into attachments ( file_name, file_type, attach_to_id, blob_data, attach_type) values (:file_name, :file_type, :attach_to_id, :bufs, :attach_type);';
     return await this.app[DB].query(sql,
@@ -248,12 +248,14 @@ class AttachmentsService extends Service {
   // 状态变更
   async postStep(step, id, fileName, bufs, thumbBufs, thumb_bufs_name, attr = null, DB) {
     const sequelize = this.app.Sequelize;
-    const replace = (thumb_bufs_name && thumbBufs) ? [ bufs, thumb_bufs_name, thumbBufs ] : [ bufs ];
+    const replace = [ bufs ];
+    if (thumb_bufs_name) replace.push(thumb_bufs_name);
+    if (thumbBufs) replace.push(thumbBufs);
     try {
       const sql = `update plan set 
       ${step}= (?) 
       ${thumb_bufs_name ? `, ${step}_thumbnailname= (?)` : ''} 
-      ${thumb_bufs_name ? `, ${step}_thumbnail= (?)` : ''} 
+      ${thumbBufs ? `, ${step}_thumbnail= (?)` : ''} 
       ${fileName ? `, ${step}_filename='${fileName}'` : ''}
       ${attr ? `, ${step}_1='${attr}'` : ''} 
       where uuid = '${id}';`;
