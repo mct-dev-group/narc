@@ -298,7 +298,7 @@ class AttachmentsService extends Service {
 
   async getF2to3(gid, DB) {
     const sequelize = this.app.Sequelize;
-    const sql = `select f2to3, f2to3_1 from plan where gid = ${gid}`;
+    const sql = `select f2to3, f2to3_1, f2to3_thumbnail from plan where gid = ${gid}`;
     return await this.app[DB].query(sql,
       {
         type: sequelize.QueryTypes.SELECT,
