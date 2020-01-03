@@ -516,7 +516,7 @@ class AttachmentsController extends Controller {
         result[0].step = `F${m}to${n}`;
         result[0].status = status;
         if (thumbAttaId) {
-          const thumbnail = await service.attachments.getAttachmentById(attaId, DB);
+          const thumbnail = await service.attachments.getAttachmentById(thumbAttaId, DB);
           const { file_type, blob_data, file_name } = thumbnail[0];
           const thumbnail_buf_buffer = Buffer.from(blob_data, 'binary');
           const thumbnailBase64 = thumbnail_buf_buffer.toString('base64');
