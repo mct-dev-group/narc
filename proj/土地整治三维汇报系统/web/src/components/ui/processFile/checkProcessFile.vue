@@ -47,7 +47,8 @@ export default {
         eleLink.href =URL.createObjectURL(blob);
         // 触发点击
         document.body.appendChild(eleLink);
-        eleLink.click();        
+        eleLink.click();
+        URL.revokeObjectURL(eleLink.href);
         document.body.removeChild(eleLink);
       });
     },    

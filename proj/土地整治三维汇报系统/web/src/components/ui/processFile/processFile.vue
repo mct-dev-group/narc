@@ -2,7 +2,7 @@
   <div class="processFile">
     <el-tabs 
       tab-position='left' 
-      style="height: 360px;" 
+      style="height: 540px;" 
       :value='activeTab' 
       :before-leave='handleBeforeLeave'
     >

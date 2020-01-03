@@ -14,7 +14,7 @@
           <attachments  ref='attachments' :gid='dataForTabs.gid' :files='files'/>
         </el-tab-pane>
         <el-tab-pane label="查看详情" name='3' v-if='dataForTabs.showType!==0'>
-          <checkDetail ref='checkDetail' :details.sync='dataForTabs.details' :showType='dataForTabs.showType' :closeTabsBox='closeTabsBox'/>
+          <checkDetail ref='checkDetail' v-loading='detailLoading' :details.sync='dataForTabs.details' :thumbnails='thumbnails' :showType='dataForTabs.showType' :lastFile='lastFile'/>
         </el-tab-pane>
         <el-tab-pane label="流程文件" name='4' v-if='dataForTabs.showType===0'>          
           <processFile ref='processFile' :gid='dataForTabs.gid'/>
@@ -38,10 +38,12 @@ export default {
         total:0,
         sumMap:null,
         countMap:null
-      },
-      checkLoading:false,
+      },      
       chartLoading:false,
-      files:'',      
+      files:'',
+      detailLoading:false,
+      thumbnails:null,
+      lastFile:null,
       DB:this.$store.state.db
     }
   },
@@ -113,11 +115,31 @@ export default {
         case '2':          
           this.$refs.attachments.activeTab='1';
           break;
+        //查看详情
+        case '3':          
+          if(this.dataForTabs.showType===2){
+            this.detailLoading=true;
+            get('/attachs/getAllFmtonAttach/'+this.dataForTabs.id+'/'+this.DB).then(res=>{
+              if(res.code===1){
+                const data=res.data;
+                this.detailLoading=false;
+                if(data.length){
+                  this.thumbnails=new Map(data.map(d=>[d.step.split('to')[1]*1,d.file_name+'.'+d.file_type]));                
+                  const {file_name,file_type,thumbnail,thumbnail_type}=data.filter(d=>d.step.split('to')[1]*1===d.status)[0];
+                  this.lastFile={
+                    fileProp:file_name+'.'+file_type,
+                    imgSrc:`data:image/${thumbnail_type};base64,` + thumbnail,
+                  }
+                }                
+              }
+            });
+          }          
+          break;
         //流程文件
-        case '4':
+        case '4':          
           this.$nextTick(()=>{
             this.$refs.processFile.activeTab='1';
-          });          
+          });
           break;
       };
       switch(oName){        
@@ -148,7 +170,7 @@ export default {
 
 <style lang="scss" scoped>
 .tabsBox{
-  width: 600px;
+  width: 100%;
   margin: 0 auto;
 
   background-color: #fff;
@@ -168,7 +190,7 @@ export default {
     font-weight: bold;
   }
   .content{
-    height: 450px;
+    height:600px;
   }
 
 }

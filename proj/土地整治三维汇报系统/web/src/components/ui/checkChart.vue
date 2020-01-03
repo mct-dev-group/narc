@@ -25,9 +25,7 @@
     </div>
     <div class="chart">
       <el-table 
-        :data="tableData"
-        size='mini'
-        style="width:580px;margin:0 auto;"
+        :data="tableData"             
       >
         <el-table-column
           fixed="left"
@@ -196,8 +194,7 @@ export default {
           }
         },
         grid:{
-          show:true,
-          width:400,
+          show:true,          
           left :'160px',
           bottom:30
         },
@@ -235,7 +232,7 @@ export default {
 
 <style lang="scss" scoped>
 .checkChart{
-  height: 380px;
+  height: 540px;
 
   .progress{        
     padding: 0 8px;
@@ -254,8 +251,9 @@ export default {
     }
   }
   #planChart {
-    width: 580px;
-    height:210px;  
+    box-sizing: border-box;
+    width: 100%;
+    height:350px;  
     border: 1px solid #CCC;
     margin:10px  auto 0;
   }

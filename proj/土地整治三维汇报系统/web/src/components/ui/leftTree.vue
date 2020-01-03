@@ -30,7 +30,7 @@
       :title='dialogTitle'
       :visible.sync="tabsVisible"
       :close-on-click-modal='false'      
-      width="640px"
+      width="1024px"
       append-to-body
       @close='handleDialogClose'
       @open='handleDialogOpen'
@@ -158,7 +158,8 @@ export default {
         n=n.parent;
       }      
       this.dialogTitle=title;      
-      this.dataForTabs.gid=data.gid;       
+      this.dataForTabs.gid=data.gid;
+      this.dataForTabs.id=data.id;
       switch(data.from_table){
         case 'county' :
           let menuCopy=menu.slice();
@@ -207,7 +208,8 @@ export default {
       menuDom.style.top=evt.clientY+'px';
 
       
-      this.dataForTabs.gid=data.gid;      
+      this.dataForTabs.gid=data.gid;
+      this.dataForTabs.id=data.id; 
       switch(data.from_table){
         case 'county' :
           let menuCopy=menu.slice();
