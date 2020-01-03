@@ -128,9 +128,9 @@ export default {
                   const {file_name,file_type,thumbnail,thumbnail_type}=data.filter(d=>d.step.split('to')[1]*1===d.status)[0];
                   this.lastFile={
                     fileProp:file_name+'.'+file_type,
-                    imgSrc:`data:image/${thumbnail_type};base64,` + thumbnail,
+                    imgSrc:(thumbnail_type&&thumbnail)?`data:image/${thumbnail_type};base64,` + thumbnail:'',
                   }
-                }                
+                }
               }
             });
           }          

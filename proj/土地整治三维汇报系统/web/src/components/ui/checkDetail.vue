@@ -101,7 +101,7 @@ export default {
       }      
     },
     lastFile:function(){
-      if(this.lastFile){        
+      if(this.lastFile){
         this.imgSrc=this.lastFile.imgSrc;
         this.fileProp=this.lastFile.fileProp;
       }      
