@@ -125,7 +125,7 @@ class AttachmentsService extends Service {
         }
       );
     } else {
-      await this.insertArrtach(file_name, file_type, attach_to_id, bufs, attach_type, DB);
+      await this.insertAttach(file_name, file_type, attach_to_id, bufs, attach_type, DB);
       await this.insertNewAttachToTree(DB);
     }
     return { file_name, file_type, attach_to_id, attach_type, DB };
@@ -259,6 +259,7 @@ class AttachmentsService extends Service {
       ${fileName ? `, ${step}_filename='${fileName}'` : ''}
       ${attr ? `, ${step}_1='${attr}'` : ''} 
       where uuid = '${id}';`;
+      console.log({ sql, replace });
       return await await this.app[DB].query(
         sql,
         {
@@ -266,6 +267,7 @@ class AttachmentsService extends Service {
           type: sequelize.QueryTypes.UPDATE,
         });
     } catch (error) {
+      console.log('postStep', error );
       throw error;
     }
   }

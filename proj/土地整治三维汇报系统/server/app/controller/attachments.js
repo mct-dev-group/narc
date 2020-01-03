@@ -372,7 +372,7 @@ class AttachmentsController extends Controller {
         await service.attachments.insertAttach(file_name, file_type, ranId, file_bufs, null, DB);
         // console.log(1, ranId);
         const attach_gid = await service.attachments.getAttachGidById(ranId, DB);
-        const { gid: gid1 } = attach_gid[0];
+        const gid1 = attach_gid[0].gid;
         let gid2 = null;
         if (thumb_name) {
           let thumb_bufs = null;
@@ -383,7 +383,7 @@ class AttachmentsController extends Controller {
           const file_name = splitname;
           await service.attachments.insertAttach(file_name, file_type, ranId2, thumb_bufs, null, DB);
           const attach_gid = await service.attachments.getAttachGidById(ranId2, DB);
-          gid2 = attach_gid[0];
+          gid2 = attach_gid[0].gid;
         }
         // console.log(2, gid);
         for (const key in sheet1) {
@@ -391,6 +391,7 @@ class AttachmentsController extends Controller {
             const row = key.slice(1);
             if (row !== '1') {
               uuid = sheet1[ key ].v;
+              console.log({ uuid });
               snum = sheet1[`A${row}`].v;
               // thumb_name = sheet1[ `D${row}` ].v;
               let attr;
