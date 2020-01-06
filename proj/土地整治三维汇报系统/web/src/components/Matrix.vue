@@ -35,9 +35,8 @@ export default {
       this.$store.state.pbUrls.forEach(url => {
         bt_Util.executeScript("Render\\RenderDataContex\\DataPump\\OsgScene\\OpenOsgScene mc://"+url+";");
       });
-      	    
-	  
-	    bt_Util.executeScript('Render\\CameraControl\\FlyTo3 '+this.$store.state.indexCameraParam+' 5000;');
+      	    	  
+	    bt_Util.executeScript('Render\\Camera\\SetParam '+this.$store.state.indexCameraParam+';');
     }
   }
 };
