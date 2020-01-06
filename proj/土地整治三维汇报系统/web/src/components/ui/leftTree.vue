@@ -103,7 +103,8 @@ export default {
       lastLayer:'',
       tabsVisible:false,
       dialogTitle:'',
-      menuId:''
+      menuId:'',
+      parents:[]
     }
   },
   watch: {
@@ -245,9 +246,19 @@ export default {
     handleDialogClose(){      
       this.$refs.tabs&&this.$refs.tabs.closeTabsBox();      
     },
-    filterNode(value, data) {
+    filterNode(value, data, node) {
+      if (node.level === 1) this.parents = [];
       if (!value) return true;
-      return data.label.indexOf(value) !== -1;
+      if (this.parents.includes(node.parent.id)) {
+        this.parents.push(node.id);
+        return true;
+      }
+      if(data.label.indexOf(value) !== -1){
+        this.parents.push(node.id);
+        return true;
+      }else{
+        return false;
+      }
     },
     getCurrentAreaInfo (obj,canFly='false') {
       if (obj.from_table && obj.from_table != 'county') {
