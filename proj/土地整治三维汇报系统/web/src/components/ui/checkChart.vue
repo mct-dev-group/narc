@@ -25,7 +25,8 @@
     </div>
     <div class="chart">
       <el-table 
-        :data="tableData"             
+        :data="tableData"
+        size='small'
       >
         <el-table-column
           fixed="left"
