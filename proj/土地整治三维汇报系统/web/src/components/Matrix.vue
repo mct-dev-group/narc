@@ -37,7 +37,7 @@ export default {
       });
       	    
 	  
-	    bt_Util.executeScript('Render\\CameraControl\\FlyTo3 524437 3959195 9542 524462 3961135 136.673102 5000;');
+	    bt_Util.executeScript('Render\\CameraControl\\FlyTo3 '+this.$store.state.indexCameraParam+' 5000;');
     }
   }
 };
