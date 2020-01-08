@@ -18,6 +18,7 @@
       @change='handleSwitchChange'
     >
     </el-switch>
+
   </div>
 </template>
 
@@ -174,69 +175,75 @@ export default {
     },
     handleSwitchChange(status){
       if(status){
+        const loading = this.$loading({
+          lock: true,
+          text: '进度统计中...',
+          customClass:'test',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
         get('/geom/getAllCountryStatusWeight/'+this.$store.state.db).then(res=>{
-          if(res.code===1){
-            const data=res.data;            
+          if(res.code===1){            
+            const data=res.data;
+            console.log(data)
             data.map((d,i)=>{              
               const [x,y]=d.geom.geometry.coordinates;
-              let r=bt_Util.lineIntersect(x,y,0,x,y,99999999);
-              if(r.intersected===1){
-                const div=`<div id="overviewChart${i}" class='overviewChartDiv'></div>`
-                bt_Plug_Annotation.setAnnotation('overview'+i,x,y,r.z,0,0,div,false);
-                this.annos.push('overview'+i);
-                //draw                               
-                let chart=this.$echarts.init(document.getElementById('overviewChart'+i));
-                const pieAreaSeriesData=[                  
-                  {value:d.percentage,name:'已完成',count:d.count},
-                  {value:100-d.percentage,name:'未完成',count:d.count}                  
-                ];                
-                let pieArea={
-                  title:{
-                    text:d.xzqmc,
-                    left:'center',
-                    textStyle:{
-                      fontSize:12
-                    }
-                  },
-                  legend:{
-                    show:false
-                  },
-                  tooltip:{
-                    formatter: function(params){
-                      return '已完成工作量占比 '+(params.name==='未完成'?(100-params.percent).toFixed(2):params.percent)+'%<br/>总图斑数 '+params.data.count+' 个'
-                    }
-                  },
-                  grid:{
-                    width:'100%',
-                    height:'70%',
-                    left :0,
-                    bottom:5
-                  },
-                  series : [
-                    {
-                      name: '详情统计',
-                      type: 'pie',
-                      radius: '75%',                      
-                      center: ['50%', '60%'],
-                      label:{
-                        show:false
-                      },
-                      labelLine:{
-                        show:false
-                      },
-                      itemStyle:{
-                        color:function(params){
-                          const colors=['#67C23A','#ebee30'];
-                          return colors[params.dataIndex]
-                        }
-                      },
-                      data:pieAreaSeriesData
+              let r=bt_Util.lineIntersect(x,y,-9999999,x,y,99999999);
+              const div=`<div id="overviewChart${i}" class='overviewChartDiv'></div>`
+              bt_Plug_Annotation.setAnnotation('overview'+i,x,y,r.z,0,0,div,false);
+              this.annos.push('overview'+i);
+              //draw
+              let chart=this.$echarts.init(document.getElementById('overviewChart'+i));
+              const pieAreaSeriesData=[                  
+                {value:d.percentage,name:'已完成',count:d.count},
+                {value:100-d.percentage,name:'未完成',count:d.count}                  
+              ];                
+              let pieArea={
+                title:{
+                  text:d.xzqmc,
+                  left:'center',
+                  textStyle:{
+                    fontSize:12
+                  }
+                },
+                legend:{
+                  show:false
+                },
+                tooltip:{
+                  formatter: function(params){
+                    return '已完成工作量占比 '+(params.name==='未完成'?(100-params.percent).toFixed(2):params.percent)+'%<br/>总图斑数 '+params.data.count+' 个'
+                  }
+                },
+                grid:{
+                  width:'100%',
+                  height:'70%',
+                  left :0,
+                  bottom:5
+                },
+                series : [
+                  {
+                    name: '详情统计',
+                    type: 'pie',
+                    radius: '75%',                      
+                    center: ['50%', '60%'],
+                    label:{
+                      show:false
                     },
-                  ]
-                };                
-                // 使用刚指定的配置项和数据显示图表。
-                chart.setOption(pieArea);
-              }
+                    labelLine:{
+                      show:false
+                    },
+                    itemStyle:{
+                      color:function(params){
+                        const colors=['#67C23A','#ebee30'];
+                        return colors[params.dataIndex]
+                      }
+                    },
+                    data:pieAreaSeriesData
+                  },
+                ]
+              };                
+              // 使用刚指定的配置项和数据显示图表。
+              chart.setOption(pieArea);
 
             })
             
@@ -245,8 +252,11 @@ export default {
             throw new Error(`getAllCountryStatusWeight Error！`);
           }          
         }).catch(error=>{
+          this.$message.error(error.stack);
           console.error(error);
-        })
+        }).finally(()=>{        
+          loading.close();
+      })
       }else{
         this.annos.forEach(a=>{
           bt_Plug_Annotation.removeAnnotation(a);
@@ -255,8 +265,16 @@ export default {
     }
   }
 };
-function drawOverviewChart(id){
-  
+//获取离重心最近的点
+function getNearestPoint(points,centerPonit){    
+    var centerPonitX=centerPonit["x"];
+    var centerPonitY=centerPonit["y"];
+    var distanceArr=points.map(function(item){                
+        return [Math.sqrt(Math.pow(Math.abs(centerPonitX - item.x),2) + Math.pow(Math.abs(centerPonitY- item.y),2)),item];                 
+    }).sort((a,b)=>{
+        return a[0]-b[0];
+    });
+    return  distanceArr[0][1];
 }
 </script>
 

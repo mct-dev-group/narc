@@ -103,22 +103,21 @@ export default {
           if(res.code===1){
             this.$message.success(`${typeName}文件上传成功！`);
             return get('/geom/updateStatusForCountry/'+this.DB);
-          }else{
-            this.$message.error(`Error！`);
+          }else{            
             this.errors=res.data;
             this.dialogVisible=true;
-            throw new Error('error');
+            throw new Error('文件上传失败！');
           }
         }).then(res=>{
-          if(res.code!==1){
-            this.$message.error(`图层更新出错！`);
+          if(res.code!==1){            
             throw new Error('图层更新出错！');
           }
         }).catch(error=>{
-          this.$message.error('服务出错！');
+          this.$message.error(error.stack.split(/\n/)[0]);
           console.error(error);
         }).finally(()=>{
           loading.close();
+          this.fileMap.clear();
           this.$refs[type][0].clearFiles();
         });
       }else{

@@ -24,8 +24,7 @@ export default {
       fileList:new Map(),
       DB:'',
       fileType:config.fileTypeATT,
-      uploadMaxSize:config.uploadMaxSize,
-      dialogVisible:false
+      uploadMaxSize:config.uploadMaxSize,      
     }
   },
   props:['gid'],
@@ -71,8 +70,7 @@ export default {
       }
       const loading = this.$loading({
         lock: true,
-        text: '上传中...',
-        customClass:'test',
+        text: '上传中...',        
         spinner: 'el-icon-loading',
         background: 'rgba(0, 0, 0, 0.7)'
       });

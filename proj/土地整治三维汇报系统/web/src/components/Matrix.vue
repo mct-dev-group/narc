@@ -25,13 +25,6 @@ export default {
 
       bt_Util.executeScript("Render\\RenderDataContex\\DataPump\\SetClientCacheSize 0 256;");
 
-      // bt_Util.executeScript("Render\\RenderDataContex\\DataPump\\OsgScene\\OpenOsgScene mc://http://" + location.hostname + ":8989/ gwh/GWH.osgb.pb;");
-      // bt_Util.executeScript("Render\\RenderDataContex\\ModelScene\\OpenModelScene mc://http://" + location.hostname + ":8989/ cam1.pb;");
-      // bt_Util.executeScript("Render\\Camera\\JumpTo 547300.000000 3374948.750000 431.889771;");
-
-      // bt_Util.executeScript("Render\\RenderDataContex\\DataPump\\OsgScene\\OpenOsgScene mc://http://192.168.0.250:9005/pb/ index.pb;");
-            
-      // bt_Util.executeScript('Render\\CameraControl\\FlyTo2 536900 3804500 50;');
       this.$store.state.pbUrls.forEach(url => {
         bt_Util.executeScript("Render\\RenderDataContex\\DataPump\\OsgScene\\OpenOsgScene mc://"+url+";");
       });
