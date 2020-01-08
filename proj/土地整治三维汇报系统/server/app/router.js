@@ -5,7 +5,7 @@
  */
 module.exports = app => {
   const { router, controller } = app;
-  router.get('/attachs/culcWithin/:DB', controller.attachments.culcWithin);
+  // router.get('/attachs/culcWithin/:DB', controller.attachments.culcWithin);
   router.get('/attachs/getTree/:DB', controller.attachments.getTree);
   router.post('/attachs/postAttachment', controller.attachments.postAttachment);
   router.get(
