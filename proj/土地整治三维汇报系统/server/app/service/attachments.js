@@ -83,9 +83,9 @@ class AttachmentsService extends Service {
     when cvt.from_table = 'village' then
       (select v.xzqmc as label from village v where v.gid = cvt.id and cvt.from_table = 'village')
     when cvt.from_table = 'spot' then
-      (select (cast (s.objectid as text)) as label from spot s where s.gid = cvt.id and cvt.from_table = 'spot')
+      (select RIGHT((cast (s.uuid as text)), 6) as label from spot s where s.gid = cvt.id and cvt.from_table = 'spot')
     when cvt.from_table = 'plan' then
-      (select (cast (p.objectid as text)) as label from plan p where p.gid = cvt.id and cvt.from_table = 'plan')
+      (select RIGHT((cast (p.uuid as text)), 6) as label from plan p where p.gid = cvt.id and cvt.from_table = 'plan')
     else
       '县'
     end as label
