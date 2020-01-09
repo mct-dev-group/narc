@@ -7,10 +7,11 @@ let searchWMSdbOnClick;
 export default {
   name: "searchWMSdb",
   data() {
-    return {};
+    return {
+      DB:this.$store.state.db
+    };
   },
-  mounted() {
-    this.DB=this.$store.state.db;
+  mounted() {    
     const v = this;
     searchWMSdbOnClick = (...args) => v.onClick.apply(null, args);
     bt_event.addEventListener('GUIEvent\\KM\\OnMouseDbClick', searchWMSdbOnClick);

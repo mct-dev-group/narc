@@ -104,6 +104,7 @@ export default {
       if(this.lastFile){
         this.imgSrc=this.lastFile.imgSrc;
         this.fileProp=this.lastFile.fileProp;
+        this.bolbUrl=this.lastFile.bolbUrl;
       }      
     },
   },
@@ -144,6 +145,10 @@ export default {
       eleLink.download = this.fileProp;
       eleLink.style.display = 'none';
       // 将base64解码
+      if(this.bolbUrl.length<1){
+        this.$message.error(`无文件信息！`);
+        return;
+      }
       var bytes = atob(this.bolbUrl[0]);
       let n = bytes.length;        
       var byteArray = new Uint8Array(n);

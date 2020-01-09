@@ -125,10 +125,11 @@ export default {
                 this.detailLoading=false;
                 if(data.length){
                   this.thumbnails=new Map(data.map(d=>[d.step.split('to')[1]*1,d.file_name+'.'+d.file_type]));                
-                  const {file_name,file_type,thumbnail,thumbnail_type}=data.filter(d=>d.step.split('to')[1]*1===d.status)[0];
+                  const {mime_type,blob_data,file_name,file_type,thumbnail,thumbnail_type}=data.filter(d=>d.step.split('to')[1]*1===d.status)[0];
                   this.lastFile={
                     fileProp:file_name+'.'+file_type,
                     imgSrc:(thumbnail_type&&thumbnail)?`data:image/${thumbnail_type};base64,` + thumbnail:'',
+                    bolbUrl:[blob_data,mime_type]
                   }
                 }
               }
