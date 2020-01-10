@@ -59,10 +59,27 @@ export default {
       if(/^image\//ig.test(type)){
         const url=`data:${type};base64,` + dataURL;
         const img ="<img  style='border:none;height:100%;' src='" + url + "'/>";
-        let x = window.open();        
+        let x = window.open();
+        x.document.open();
         x.document.write(img);
         x.document.body.style.margin=0;
         x.document.close();
+      }else if(type==='application/pdf'){        
+        let bytes = atob(dataURL);
+        let n = bytes.length;        
+        var byteArray = new Uint8Array(n);
+        while (n--) {
+          byteArray[n] = bytes.charCodeAt(n);
+        }
+        let blob = new Blob([byteArray],{type : type});        
+        const url=URL.createObjectURL(blob);
+        const iframe=`<iframe src='${url}' name='test' width="100%" height="100%" style="border: none;"></iframe>`;                                
+        let x = window.open();
+        x.document.open();
+        x.document.write(iframe);
+        x.document.body.style.margin=0;
+        x.document.close();
+        URL.revokeObjectURL(url);    
       }else{
         //download        
         var eleLink = document.createElement('a');
