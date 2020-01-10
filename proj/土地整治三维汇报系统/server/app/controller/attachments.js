@@ -355,8 +355,8 @@ class AttachmentsController extends Controller {
     const step = `f${m}to${n}`;
     const sheet1 = workbook.Sheets[ workbook.SheetNames[0] ];
     const files = fs.readdirSync(files_path);
-    let attach_file_name = sheet1.C2.v;
-    let thumb_name = sheet1.D2 ? sheet1.D2.v : null;
+    let attach_file_name = sheet1.C2.v.trim();
+    let thumb_name = sheet1.D2 ? sheet1.D2.v.trim() : null;
     const is2to3 = (m === 2 && n === 3);
     let uuid, // 唯一标识
       snum; // 序号
@@ -365,7 +365,7 @@ class AttachmentsController extends Controller {
         if (!files.includes(attach_file_name)) throw `未找到文件 ${attach_file_name}`;
         const splitname = attach_file_name.split('.');
         const file_type = splitname.pop();
-        const file_name = splitname;
+        const file_name = splitname.join(',');
         const file_bufs = await fsPromises.readFile(files_path + '/' + attach_file_name);
         const ranId = randomNegNumber();
         const ranId2 = randomNegNumber();
@@ -380,7 +380,7 @@ class AttachmentsController extends Controller {
           thumb_bufs = await fsPromises.readFile(files_path + '/' + thumb_name);
           const splitname = thumb_name.split('.');
           const file_type = splitname.pop();
-          const file_name = splitname;
+          const file_name = splitname.join(',');
           await service.attachments.insertAttach(file_name, file_type, ranId2, thumb_bufs, null, DB);
           const attach_gid = await service.attachments.getAttachGidById(ranId2, DB);
           gid2 = attach_gid[0].gid;
@@ -390,12 +390,12 @@ class AttachmentsController extends Controller {
           if (sheet1.hasOwnProperty(key) && key.startsWith('B')) {
             const row = key.slice(1);
             if (row !== '1') {
-              uuid = sheet1[ key ].v;
+              uuid = sheet1[ key ].v.trim();
               console.log({ uuid });
-              snum = sheet1[`A${row}`].v;
+              snum = sheet1[`A${row}`].v.trim();
               // thumb_name = sheet1[ `D${row}` ].v;
               let attr;
-              if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v;
+              if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v.trim();
               await service.attachments.postStep(step, uuid, null, gid1, gid2, null, attr, DB);
               await service.attachments.setStatus(uuid, n, DB);
             }
@@ -412,16 +412,16 @@ class AttachmentsController extends Controller {
               if (row !== '1') {
                 try {
                   if (!files.includes(attach_file_name)) throw `未找到文件 ${attach_file_name}`;
-                  uuid = sheet1[ key ].v;
-                  snum = sheet1[`A${row}`].v;
+                  uuid = sheet1[ key ].v.trim();
+                  snum = sheet1[`A${row}`].v.trim();
                   if (!uuid) throw '图斑唯一标识为空';
                   let attr;
-                  if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v;
+                  if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v.trim();
                   if (!sheet1[ `C${row}` ]) throw `未找到 ${uuid} 对应文件名`;
-                  attach_file_name = sheet1[ `C${row}` ].v;
+                  attach_file_name = sheet1[ `C${row}` ].v.trim();
                   if (!attach_file_name) throw `未找到 ${key} 对应文件名`;
                   let thumb_bufs = null;
-                  thumb_name = sheet1[ `D${row}` ] ? sheet1[ `D${row}` ].v : null;
+                  thumb_name = sheet1[ `D${row}` ] ? sheet1[ `D${row}` ].v.trim() : null;
                   const file_bufs = await fsPromises.readFile(files_path + '/' + attach_file_name);
                   if (thumb_name) {
                     if (!files.includes(thumb_name)) throw `未找到缩略图${thumb_name}`;

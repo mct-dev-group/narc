@@ -267,7 +267,7 @@ class AttachmentsService extends Service {
           type: sequelize.QueryTypes.UPDATE,
         });
     } catch (error) {
-      console.log('postStep', error );
+      console.log('postStep', error);
       throw error;
     }
   }
