@@ -419,9 +419,9 @@ class AttachmentsController extends Controller {
                   if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v;
                   if (!sheet1[ `C${row}` ]) throw `未找到 ${uuid} 对应文件名`;
                   attach_file_name = sheet1[ `C${row}` ].v;
-                  thumb_name = sheet1[ `D${row}` ].v;
                   if (!attach_file_name) throw `未找到 ${key} 对应文件名`;
                   let thumb_bufs = null;
+                  thumb_name = sheet1[ `D${row}` ] ? sheet1[ `D${row}` ].v : null;
                   const file_bufs = await fsPromises.readFile(files_path + '/' + attach_file_name);
                   if (thumb_name) {
                     if (!files.includes(thumb_name)) throw `未找到缩略图${thumb_name}`;
