@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import {get} from '@/utils/fetch';
+import axios from 'axios';
 import uploadATT from './uploadATT';
 import checkATT from './checkATT';
 
@@ -28,7 +28,8 @@ export default {
       activeTab:'0',
       loading:true,
       DB:this.$store.state.db,
-      files:null
+      files:null,
+      source:null,
     }
   },
   props:['gid'],
@@ -40,19 +41,26 @@ export default {
     clear(){
       this.activeTab='0';
       this.files=null;
+      this.source&&this.source.cancel('request canceled .');
+      this.source=null;
     },
     handleBeforeLeave(aName,oName){
       if(aName==='2'){
         this.loading=true;
-        get("/attachs/getAttachmentListById/" +this.gid+'/'+this.DB).then(res=>{          
-          const promises=res.data.map(f=>get("/attachs/getAttachmentById/"+f.gid+"/"+this.DB));
-          return Promise.all(promises);
-        }).then(res=>{                    
-          this.files=res.filter(r=>r.code===1).map(a=>a.data[0]);
-          this.loading=false;          
+        this.source=axios.CancelToken.source();
+        axios.get("/attachs/getAttachmentListById/" +this.gid+'/'+this.DB,{cancelToken: this.source.token}).then(res=>{             
+          const promises=res.data.data.map(f=>axios.get("/attachs/getAttachmentById/"+f.gid+"/"+this.DB,{cancelToken: this.source.token}));
+          return axios.all(promises);
+        }).then(res=>{          
+          this.files=res.map(r=>r.data).filter(d=>d.code===1).map(a=>a.data[0]);
+          this.loading=false;
         }).catch(error=>{
           console.error(error);
+          this.source.cancel('request canceled .');
         });
+      }
+      if(oName==='2'){
+        this.source&&this.source.cancel('request canceled .');
       }
     }
   }
