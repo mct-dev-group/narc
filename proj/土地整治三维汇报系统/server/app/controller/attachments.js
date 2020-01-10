@@ -365,7 +365,7 @@ class AttachmentsController extends Controller {
         if (!files.includes(attach_file_name)) throw `未找到文件 ${attach_file_name}`;
         const splitname = attach_file_name.split('.');
         const file_type = splitname.pop();
-        const file_name = splitname.join(',');
+        const file_name = splitname.join('.');
         const file_bufs = await fsPromises.readFile(files_path + '/' + attach_file_name);
         const ranId = randomNegNumber();
         const ranId2 = randomNegNumber();
@@ -380,7 +380,7 @@ class AttachmentsController extends Controller {
           thumb_bufs = await fsPromises.readFile(files_path + '/' + thumb_name);
           const splitname = thumb_name.split('.');
           const file_type = splitname.pop();
-          const file_name = splitname.join(',');
+          const file_name = splitname.join('.');
           await service.attachments.insertAttach(file_name, file_type, ranId2, thumb_bufs, null, DB);
           const attach_gid = await service.attachments.getAttachGidById(ranId2, DB);
           gid2 = attach_gid[0].gid;
