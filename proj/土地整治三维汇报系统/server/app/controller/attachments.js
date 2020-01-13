@@ -90,14 +90,10 @@ class AttachmentsController extends Controller {
     try {
       const result = await service.attachments.getAttachmentById(id, DB);
       const { file_type, blob_data } = result[0];
-      const buffer = Buffer.from(blob_data, 'binary');
-      const bufferBase64 = buffer.toString('base64');
-      // result.setDataValue('mime_type', mime.lookup(file_type));
-      result[0].mime_type = mime.lookup(file_type);
-      result[0].blob_data = bufferBase64;
-      rb = helper.getSuccess(result);
+      ctx.type = mime.lookup(file_type);
+      rb = blob_data;
     } catch (error) {
-      // console.log(error)
+      console.log(error);
       rb = helper.getFailed(error);
     } finally {
       ctx.body = rb;

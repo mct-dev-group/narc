@@ -9,7 +9,7 @@ module.exports = app => {
   router.get('/attachs/getTree/:DB', controller.attachments.getTree);
   router.post('/attachs/postAttachment', controller.attachments.postAttachment);
   router.get(
-    '/attachs/getAttachmentById/:id/:DB',
+    '/attachs/getAttachmentById/:id/:DB/:name',
     controller.attachments.getAttachmentById
   );
   router.get(
