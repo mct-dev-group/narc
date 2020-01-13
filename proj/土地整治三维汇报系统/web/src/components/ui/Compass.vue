@@ -1,5 +1,5 @@
 <template>
-  <div class="compass" id="compassBox"></div>
+  <div class="compass" id="compassBox" @dblclick="handleDBClick"></div>
 </template>
 
 <script>
@@ -53,6 +53,9 @@ export default {
       this.cav.translate(this.img.width / 2, this.img.height / 2);
       this.cav.rotate(rot);
       this.cav.drawImage(this.img, -this.img.width/2, -this.img.height/2);
+    },
+    handleDBClick(){
+      bt_Util.executeScript('Render\\Camera\\SetParam '+this.$store.state.indexCameraParam+';');
     }
   }
 }
