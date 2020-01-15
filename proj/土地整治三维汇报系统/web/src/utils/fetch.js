@@ -8,7 +8,7 @@ axios.defaults.baseURL = config.baseUrl;
 // 拦截器
 axios.interceptors.request.use(
   config => {
-    if(/^\/attachs\//.test(config.url)){
+    if(/^\/attachs\//.test(config.url)&&config.method==='post'){
       config.headers = {
         'Content-Type': 'multipart/form-data'
       };

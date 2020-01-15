@@ -6,7 +6,7 @@
           <el-step v-for='(item,index) of spotStatus' :key='index'>              
             <div v-if='index>0&&index<spotStatus.length&&index<=(status-1)' slot="title" @click="checkExtendProps(item[0])">{{item[1]}}</div>
             <div v-else slot="title">{{item[1]}}</div>        
-            <div v-if="index>0&&index<spotStatus.length&&index<=(status-1)" slot="description" @click="checkExtendProps(item[0])" :title="thumbnails?thumbnails.get(item[0]):''">{{thumbnails?thumbnails.get(item[0]):''}}</div>                
+            <div v-if="index>0&&index<spotStatus.length&&index<=(status-1)" slot="description" @click="checkExtendProps(item[0])" :title="thumbnails&&thumbnails.get(item[0])?thumbnails.get(item[0]).fname:''">{{thumbnails&&thumbnails.get(item[0])?thumbnails.get(item[0]).fname:''}}</div>                
           </el-step>
         </el-steps>
       </el-aside>
@@ -15,13 +15,13 @@
           <el-row>
             <el-col :span=7>对应流程文件：</el-col>
             <el-col :span=17>
-              <el-link v-if="fileProp!==''" type="primary" style="max-width:100%;" @click="download" :title="fileProp">{{fileProp}}</el-link>
+              <el-link v-if="fileProp!==''" type="primary" style="max-width:100%;" @click="downloadFile" :title="fileProp">{{fileProp}}</el-link>
               <div v-else>数据未录入</div>
             </el-col>
           </el-row>
         </div>
         <div style="text-align:center;">
-          <el-image :src="imgSrc" style="width:640px;height:480px;" v-loading='imgLoading'>
+          <el-image :src="imgSrc" style="width:640px;height:480px;">
             <div slot="error" class="el-image__error">暂无缩略图</div>
             <div slot="placeholder" class="el-image__placeholder">暂无缩略图</div>
           </el-image>
@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import {get,post} from '@/utils/fetch';
+import {get} from '@/utils/fetch';
 import {arr1Dto2D} from '@/utils/common';
 import evenBus from '@/utils/event_bus';
 import { setStatus } from '@/api/api';
@@ -69,10 +69,9 @@ export default {
       innerDialog:false,      
       radio:'',
       errors:[],
-      fileProp:'',      
-      bolbUrl:[],
+      fileProp:'',
       imgSrc:'',
-      imgLoading:false,
+      download:[],
       DB:this.$store.state.db
     }
   },  
@@ -104,7 +103,7 @@ export default {
       if(this.lastFile){
         this.imgSrc=this.lastFile.imgSrc;
         this.fileProp=this.lastFile.fileProp;
-        this.bolbUrl=this.lastFile.bolbUrl;
+        this.download=this.lastFile.download;
       }      
     },
   },
@@ -114,57 +113,23 @@ export default {
       this.$emit('update:details', null);      
       this.radio='';
       this.errors=[];
-      this.fileProp='';      
-      this.bolbUrl=[];
+      this.fileProp='';
       this.imgSrc='';
-      this.imgLoading=false;
+      this.download=[];
     },
-    checkExtendProps(status){      
-      if(status>1){
-        this.imgLoading=true;
-        get(`/attachs/getF${status-1}to${status}Attach/${this.details.gid}/${this.DB}`).then(res=>{
-          if(res.code===1){            
-            const data=res.data;
-            const {mime_type,blob_data,file_name,file_type,thumbnail_type,thumbnail} = data;            
-            this.bolbUrl=[blob_data,mime_type];
-            this.fileProp=file_name+'.'+file_type;
-            this.imgSrc=(thumbnail_type&&thumbnail)?`data:image/${thumbnail_type};base64,` +thumbnail:'';            
-          }else{
-            this.imgSrc='';
-            this.bolbUrl=[];
-            this.fileProp='';
-            this.$message.error(`获取流程文件出错！`+res.data);            
-          }
-        }).catch(error=>{
-          console.error(error);
-        }).finally(()=>{
-          this.imgLoading=false;
-        });
-      }            
+    checkExtendProps(status){            
+      if(status>1){           
+        const data=this.thumbnails.get(status);
+        this.fileProp=data.fname;
+        this.imgSrc=data.tid?config.baseUrl+'attachs/getAttachmentById/'+data.tid+'/'+this.DB+'/'+data.tname:'';
+        this.download=[data.fid,data.fname];
+      }
     },
-    download(){
-      //download      
-      let eleLink = document.createElement('a');
-      eleLink.download = this.fileProp;
-      eleLink.style.display = 'none';
-      // 将base64解码
-      if(this.bolbUrl.length<1){
-        this.$message.error(`无文件信息！`);
-        return;
+    downloadFile(){
+      if(this.download.length){
+        window.open(config.baseUrl+'attachs/getAttachmentById/'+this.download[0]+'/'+this.DB+'/'+this.download[1]);
       }
-      var bytes = atob(this.bolbUrl[0]);
-      let n = bytes.length;        
-      var byteArray = new Uint8Array(n);
-      while (n--) {
-        byteArray[n] = bytes.charCodeAt(n);
-      }
-      let blob = new Blob([byteArray],{type : this.bolbUrl[1]});
-      eleLink.href =URL.createObjectURL(blob);      
-      // 触发点击
-      document.body.appendChild(eleLink);
-      eleLink.click();
-      URL.revokeObjectURL(eleLink.href);
-      document.body.removeChild(eleLink);
+      
     },
   },
 }

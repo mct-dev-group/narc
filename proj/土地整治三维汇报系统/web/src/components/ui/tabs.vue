@@ -30,6 +30,7 @@ import  attachments from './attachments/attachments';
 import  checkDetail from './checkDetail.vue';
 import  processFile from './processFile/processFile';
 import {get} from '@/utils/fetch';
+
 export default {
   name: 'tabs',
   data () {
@@ -59,8 +60,7 @@ export default {
       switch(aName){
         //统计信息
         case '1':
-          this.chartLoading=true;
-        
+          this.chartLoading=true;          
           get('/plan/getPlansIn/'+this.dataForTabs.gid+'/'+this.DB).then(res=>{            
             if(res.code===1){
               this.chartLoading=false;
@@ -118,18 +118,32 @@ export default {
         //查看详情
         case '3':          
           if(this.dataForTabs.showType===2){
-            this.detailLoading=true;
-            get('/attachs/getAllFmtonAttach/'+this.dataForTabs.id+'/'+this.DB).then(res=>{
+            this.detailLoading=true;            
+            get('/attachs/getPlanById/'+this.dataForTabs.id+'/'+this.DB).then(async res=>{              
               if(res.code===1){
                 const data=res.data;                
                 if(data.length){
-                  this.thumbnails=new Map(data.map(d=>[d.step.split('to')[1]*1,d.file_name+'.'+d.file_type]));                
-                  const {mime_type,blob_data,file_name,file_type,thumbnail,thumbnail_type}=data.filter(d=>d.step.split('to')[1]*1===d.status)[0];
-                  this.lastFile={
-                    fileProp:file_name+'.'+file_type,
-                    imgSrc:(thumbnail_type&&thumbnail)?`data:image/${thumbnail_type};base64,` + thumbnail:'',
-                    bolbUrl:[blob_data,mime_type]
+                  const d=data[0];
+                  let thumbnails=[];                  
+                  for (let k of config.spotStatusChange.keys()) {
+                    const lk=k.toLowerCase();                    
+                    const fid=d[lk],tid=d[lk+'_thumbnail'];
+                    if(!fid) continue;
+                    const fname=(await get('/attachs/getAttachmentNameById/'+fid+'/'+this.DB)).data;
+                    const tname=tid?(await get('/attachs/getAttachmentNameById/'+tid+'/'+this.DB)).data:'';
+                    thumbnails.push([lk.split('to')[1]*1,{fid,tid,fname,tname}]);
                   }
+                  const map=new Map(thumbnails);
+                  this.thumbnails=map;
+                  const last=Math.max.apply(null,[...map.keys()]);
+                  const lid=d['f'+(last-1)+'to'+last+'_thumbnail'];
+                  const lastData=map.get(last);                    
+                  const imgName=(await get('/attachs/getAttachmentNameById/'+lid+'/'+this.DB)).data;                    
+                  this.lastFile={
+                    fileProp:lastData.fname,
+                    imgSrc:lid?config.baseUrl+'attachs/getAttachmentById/'+lid+'/'+this.DB+'/'+imgName:'',
+                    download:[lastData.fid,lastData.fname]
+                  }                  
                 }
               }else{
                 this.$message.error(`获取流程文件出错！`+res.data);
