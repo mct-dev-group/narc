@@ -121,8 +121,7 @@ export default {
             this.detailLoading=true;
             get('/attachs/getAllFmtonAttach/'+this.dataForTabs.id+'/'+this.DB).then(res=>{
               if(res.code===1){
-                const data=res.data;
-                this.detailLoading=false;
+                const data=res.data;                
                 if(data.length){
                   this.thumbnails=new Map(data.map(d=>[d.step.split('to')[1]*1,d.file_name+'.'+d.file_type]));                
                   const {mime_type,blob_data,file_name,file_type,thumbnail,thumbnail_type}=data.filter(d=>d.step.split('to')[1]*1===d.status)[0];
@@ -132,7 +131,13 @@ export default {
                     bolbUrl:[blob_data,mime_type]
                   }
                 }
+              }else{
+                this.$message.error(`获取流程文件出错！`+res.data);
               }
+            }).catch(err=>{
+              console.error(err);
+            }).finally(()=>{
+              this.detailLoading=false;
             });
           }          
           break;

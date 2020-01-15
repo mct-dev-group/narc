@@ -45,6 +45,7 @@ export default {
           let data=res.data.filter((file)=>[...config.spotStatusChange.keys()].includes(file.attach_type));
           data.forEach(f=>{
             f.icon='fa fa-file-zip-o';
+            f.name=f.file_name+'.'+f.file_type
           });
           this.files=arr1Dto2D(data,3);
           this.loading=false;

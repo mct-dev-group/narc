@@ -128,14 +128,17 @@ export default {
             const {mime_type,blob_data,file_name,file_type,thumbnail_type,thumbnail} = data;            
             this.bolbUrl=[blob_data,mime_type];
             this.fileProp=file_name+'.'+file_type;
-            this.imgSrc=(thumbnail_type&&thumbnail)?`data:image/${thumbnail_type};base64,` +thumbnail:'';
-            this.imgLoading=false;
+            this.imgSrc=(thumbnail_type&&thumbnail)?`data:image/${thumbnail_type};base64,` +thumbnail:'';            
           }else{
-            this.$message.error(`获取流程文件出错！`);
-            throw new Error();
+            this.imgSrc='';
+            this.bolbUrl=[];
+            this.fileProp='';
+            this.$message.error(`获取流程文件出错！`+res.data);            
           }
         }).catch(error=>{
-          console.log(error);
+          console.error(error);
+        }).finally(()=>{
+          this.imgLoading=false;
         });
       }            
     },

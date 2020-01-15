@@ -48,11 +48,8 @@ export default {
       if(aName==='2'){
         this.loading=true;
         this.source=axios.CancelToken.source();
-        axios.get("/attachs/getAttachmentListById/" +this.gid+'/'+this.DB,{cancelToken: this.source.token}).then(res=>{             
-          const promises=res.data.data.map(f=>axios.get("/attachs/getAttachmentById/"+f.gid+"/"+this.DB,{cancelToken: this.source.token}));
-          return axios.all(promises);
-        }).then(res=>{          
-          this.files=res.map(r=>r.data).filter(d=>d.code===1).map(a=>a.data[0]);
+        axios.get("/attachs/getAttachmentListById/" +this.gid+'/'+this.DB,{cancelToken: this.source.token}).then(res=>{          
+          this.files=res.data.data.filter(r=>![...config.spotStatusChange.keys()].includes(r.attach_type));
           this.loading=false;
         }).catch(error=>{
           console.error(error);

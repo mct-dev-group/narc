@@ -4,9 +4,9 @@
       <el-row v-for="(item,index) of processFiles" :key='index'>
         <el-col v-for="(val,i) of item" :key='i' :span="8">
           <el-card shadow='hover' :body-style='{padding:"5px"}'>
-            <p>{{spotStatusChange.get(val.step||val.attach_type)}}</p>            
-            <div @click="handleProcessFileClick(val.gid,val.file_name)" :title="val.file_name+'.'+val.file_type">
-              <a class="fileLink"><i :class='val.icon'></i>{{val.file_name}}.{{val.file_type}}</a> 
+            <p>{{spotStatusChange.get(val.attach_type)}}</p>            
+            <div @click="handleProcessFileClick(val.gid,val.name)" :title="val.name">
+              <a class="fileLink"><i :class='val.icon'></i>{{val.name}}</a> 
             </div>
           </el-card>          
         </el-col>
@@ -31,26 +31,8 @@ export default {
   },
   props:['gid','processFiles'],
   methods: {
-    handleProcessFileClick(gid,file_name){      
-      get("/attachs/getAttachmentById/"+gid+"/"+this.DB).then(res=>{
-        const {mime_type, blob_data} = res.data[0];        
-        //download
-        var eleLink = document.createElement('a');
-        eleLink.download = file_name;
-        eleLink.style.display = 'none';
-        // base64 to blob
-        let bytes = atob(blob_data),n = bytes.length,byteArray = new Uint8Array(n);
-        while (n--) {
-          byteArray[n] = bytes.charCodeAt(n);
-        }
-        const blob = new Blob([byteArray],{type : mime_type});
-        eleLink.href =URL.createObjectURL(blob);
-        // 触发点击
-        document.body.appendChild(eleLink);
-        eleLink.click();
-        URL.revokeObjectURL(eleLink.href);
-        document.body.removeChild(eleLink);
-      });
+    handleProcessFileClick(gid,name){
+      window.open(config.baseUrl+'attachs/getAttachmentById/'+gid+'/'+this.DB+'/'+name);
     },    
   },
 }
