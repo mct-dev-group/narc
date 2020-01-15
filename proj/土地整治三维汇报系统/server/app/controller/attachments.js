@@ -442,7 +442,7 @@ class AttachmentsController extends Controller {
                 let attr;
                 if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v.trim();
                 const attach_file_name = sheet1[ `C${file_last_index}` ].v.trim();
-                const thumb_name = sheet1[ `D${row}` ] ? sheet1[ `D${file_last_index}` ].v.trim() : null;
+                const thumb_name = sheet1[ `D${file_last_index}` ] ? sheet1[ `D${file_last_index}` ].v.trim() : null;
                 const file_uuid = file_attachs.get(attach_file_name).file_uuid;
                 const thumb_uuid = thumb_name ? file_attachs.get(thumb_name).file_uuid : null;
                 const file_gids = await service.attachments.getAttachGidByUuid(file_uuid, DB);
