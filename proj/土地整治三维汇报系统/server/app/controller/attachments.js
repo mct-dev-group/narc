@@ -718,7 +718,7 @@ class AttachmentsController extends Controller {
     const id = this.ctx.params.id;
     const DB = this.ctx.params.DB;
     try {
-      const res = await service.attachments.getPlanByGid(id, DB);
+      const res = await service.attachments.getPlanById(id, DB);
       rb = helper.getSuccess(res);
     } catch (error) {
       console.log(error);
