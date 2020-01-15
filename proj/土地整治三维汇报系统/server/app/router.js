@@ -13,6 +13,10 @@ module.exports = app => {
     controller.attachments.getAttachmentById
   );
   router.get(
+    '/attachs/getAttachmentNameById/:id/:DB',
+    controller.attachments.getAttachmentNameById
+  );
+  router.get(
     '/attachs/getAttachmentListById/:id/:DB',
     controller.attachments.getAttachmentListById
   );
@@ -38,6 +42,8 @@ module.exports = app => {
   router.get('/attachs/getF5to6Attach/:id/:DB', controller.attachments.getF5to6Attach);
   router.get('/attachs/getF6to7Attach/:id/:DB', controller.attachments.getF6to7Attach);
   router.get('/attachs/getAllFmtonAttach/:id/:DB', controller.attachments.getAllFmtonAttach);
+
+  router.get('/attachs/getPlanByGid/:id/:DB', controller.attachments.getPlanByGid);
 
   router.get('/geom/getCurrentAreaInfo/:id/:table/:DB', controller.geom.getCurrentAreaInfo);
   router.get('/geom/setStatus/:id/:status/:DB', controller.geom.setStatus);

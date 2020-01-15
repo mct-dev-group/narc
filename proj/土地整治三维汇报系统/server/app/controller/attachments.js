@@ -48,6 +48,14 @@ class AttachmentsController extends Controller {
       stream = await ctx.getFileStream();
       const bufs = [];
       const { file_name, file_type, attach_to_id, attach_type, DB } = stream.fields;
+      // const file_uuid = uuid();
+      // const attach = fs.createWriteStream(this.config.attachDir + '/' + file_uuid);
+      // stream.pipe(attach);
+      // attach.write(bufs);
+      // attach.on('finish', () => {
+      //   console.log('wrote all data to file');
+      //   attach.end();
+      // });
       stream.on('data', d => {
         bufs.push(d);
       });
@@ -89,9 +97,32 @@ class AttachmentsController extends Controller {
     console.log(id, DB);
     try {
       const result = await service.attachments.getAttachmentById(id, DB);
-      const { file_type, blob_data } = result[0];
+      if (!result.length) throw '未找到该附件';
+      const { file_type, file_uuid } = result[0];
+      const filePath = path.join(this.config.attachDir, '/' + file_uuid + '.' + file_type);
+      // var stat = fileSystem.statSync(filePath);
+      const readStream = fs.createReadStream(filePath);
       ctx.type = mime.lookup(file_type);
-      rb = blob_data;
+      rb = readStream;
+    } catch (error) {
+      console.log(error);
+      rb = helper.getFailed(error);
+    } finally {
+      ctx.body = rb;
+    }
+  }
+
+  async getAttachmentNameById() {
+    const { ctx, service } = this;
+    const helper = ctx.helper;
+    const id = this.ctx.params.id;
+    const DB = this.ctx.params.DB;
+    console.log(id, DB);
+    try {
+      const result = await service.attachments.getAttachmentById(id, DB);
+      if (!result.length) throw '未找到该附件';
+      const filename = result[0].file_name + '.' + result[0].file_type;
+      rb = helper.getSuccess(filename);
     } catch (error) {
       console.log(error);
       rb = helper.getFailed(error);
@@ -346,93 +377,180 @@ class AttachmentsController extends Controller {
 
   async postChangeStatus(files_path, workbook, [ m, n ], DB) {
     const { ctx, service } = this;
-    const { randomNegNumber } = ctx.helper;
+    // const { randomNegNumber } = ctx.helper;
     const result = [];
     const step = `f${m}to${n}`;
     const sheet1 = workbook.Sheets[ workbook.SheetNames[0] ];
     const files = fs.readdirSync(files_path);
-    let attach_file_name = sheet1.C2.v.trim();
-    let thumb_name = sheet1.D2 ? sheet1.D2.v.trim() : null;
-    const is2to3 = (m === 2 && n === 3);
+    const updated_files = new Set();
+    let file_last_index = 1;
+    // let attach_file_name = sheet1.C2.v.trim();
+    // let thumb_name = sheet1.D2 ? sheet1.D2.v.trim() : null;
+    // const is2to3 = (m === 2 && n === 3);
     let uuid, // 唯一标识
       snum; // 序号
     try {
-      if (is2to3) {
-        if (!files.includes(attach_file_name)) throw `未找到文件 ${attach_file_name}`;
-        const splitname = attach_file_name.split('.');
-        const file_type = splitname.pop();
-        const file_name = splitname.join('.');
-        const file_bufs = await fsPromises.readFile(files_path + '/' + attach_file_name);
-        const ranId = randomNegNumber();
-        const ranId2 = randomNegNumber();
-        await service.attachments.insertAttach(file_name, file_type, ranId, file_bufs, null, DB);
-        // console.log(1, ranId);
-        const attach_gid = await service.attachments.getAttachGidById(ranId, DB);
-        const gid1 = attach_gid[0].gid;
-        let gid2 = null;
-        if (thumb_name) {
-          let thumb_bufs = null;
-          if (!files.includes(thumb_name)) throw `未找到缩略图${thumb_name}`;
-          thumb_bufs = await fsPromises.readFile(files_path + '/' + thumb_name);
-          const splitname = thumb_name.split('.');
-          const file_type = splitname.pop();
-          const file_name = splitname.join('.');
-          await service.attachments.insertAttach(file_name, file_type, ranId2, thumb_bufs, null, DB);
-          const attach_gid = await service.attachments.getAttachGidById(ranId2, DB);
-          gid2 = attach_gid[0].gid;
-        }
-        // console.log(2, gid);
-        for (const key in sheet1) {
-          if (sheet1.hasOwnProperty(key) && key.startsWith('B')) {
-            const row = key.slice(1);
-            if (row !== '1') {
-              uuid = sheet1[ key ].v.trim();
-              console.log({ uuid });
-              snum = sheet1[`A${row}`].v.trim();
-              // thumb_name = sheet1[ `D${row}` ].v;
-              let attr;
-              if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v.trim();
-              await service.attachments.postStep(step, uuid, null, gid1, gid2, null, attr, DB);
-              await service.attachments.setStatus(uuid, n, DB);
+      // 引用文件是否都上传
+      for (const key in sheet1) {
+        if (sheet1.hasOwnProperty(key) && key.startsWith('B')) {
+          const row = key.slice(1);
+          if (row !== '1') {
+            // 序号
+            snum = sheet1[`A${row}`].v;
+            uuid = sheet1[ key ].v.trim();
+            if (!uuid) throw '图斑唯一标识为空';
+            if (sheet1[ `C${row}` ]) {
+              file_last_index = row;
             }
+            const attach_file_name = sheet1[ `C${file_last_index}` ].v.trim();
+            const thumb_name = sheet1[ `D${file_last_index}` ] ? sheet1[ `D${file_last_index}` ].v.trim() : null;
+            if (thumb_name) updated_files.add(thumb_name);
+            if (!files.includes(attach_file_name)) throw `未找到文件 ${attach_file_name}`;
+            updated_files.add(attach_file_name);
           }
         }
-        await service.attachments.updateAttachGidById(ranId, -1, DB);
-        await service.attachments.updateAttachGidById(ranId2, -1, DB);
-      } else {
-        for (const key in sheet1) {
-          if (sheet1.hasOwnProperty(key)) {
-            // B is uuid
-            if (key.startsWith('B')) {
-              const row = key.slice(1);
-              if (row !== '1') {
-                try {
-                  if (!files.includes(attach_file_name)) throw `未找到文件 ${attach_file_name}`;
-                  uuid = sheet1[ key ].v.trim();
-                  snum = sheet1[`A${row}`].v.trim();
-                  if (!uuid) throw '图斑唯一标识为空';
-                  let attr;
-                  if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v.trim();
-                  if (!sheet1[ `C${row}` ]) throw `未找到 ${uuid} 对应文件名`;
-                  attach_file_name = sheet1[ `C${row}` ].v.trim();
-                  if (!attach_file_name) throw `未找到 ${key} 对应文件名`;
-                  let thumb_bufs = null;
-                  thumb_name = sheet1[ `D${row}` ] ? sheet1[ `D${row}` ].v.trim() : null;
-                  const file_bufs = await fsPromises.readFile(files_path + '/' + attach_file_name);
-                  if (thumb_name) {
-                    if (!files.includes(thumb_name)) throw `未找到缩略图${thumb_name}`;
-                    thumb_bufs = await fsPromises.readFile(files_path + '/' + thumb_name);
-                  }
-                  await service.attachments.postStep(step, uuid, attach_file_name, file_bufs, thumb_bufs, thumb_name, attr, DB);
-                  await service.attachments.setStatus(uuid, n, DB);
-                } catch (error) {
-                  throw error;
+      }
+      if (result.length) {
+        return { code: 0, data: result };
+      }
+      const file_attachs = new Map();
+      const attach_promises = Array.from(updated_files).map(async function(file) {
+        const file_bufs = await fsPromises.readFile(files_path + '/' + file);
+        // const file_uuid = await this.saveFile(file_bufs);
+        const splitname = file.split('.');
+        const file_type = splitname.pop();
+        const file_name = splitname.join('.');
+        const res = await service.attachments.postAttachment(file_name, file_type, file_bufs, -1, null, DB, true);
+        console.log('postAttachment', { res });
+        file_attachs.set(file, res);
+        return res;
+      });
+      await Promise.all(attach_promises);
+      file_last_index = 1;
+      for (const key in sheet1) {
+        if (sheet1.hasOwnProperty(key)) {
+          // B is uuid
+          if (key.startsWith('B')) {
+            const row = key.slice(1);
+            if (row !== '1') {
+              try {
+                if (sheet1[ `C${row}` ]) {
+                  file_last_index = row;
                 }
+                uuid = sheet1[ key ].v.trim();
+                snum = sheet1[`A${row}`].v;
+                let attr;
+                if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v.trim();
+                const attach_file_name = sheet1[ `C${file_last_index}` ].v.trim();
+                const thumb_name = sheet1[ `D${row}` ] ? sheet1[ `D${file_last_index}` ].v.trim() : null;
+                const file_uuid = file_attachs.get(attach_file_name).file_uuid;
+                const thumb_uuid = thumb_name ? file_attachs.get(thumb_name).file_uuid : null;
+                const file_gids = await service.attachments.getAttachGidByUuid(file_uuid, DB);
+                const thumb_gids = await service.attachments.getAttachGidByUuid(thumb_uuid, DB);
+                const file_gid = file_gids[0].gid;
+                const thumb_gid = thumb_gids[0] ? thumb_gids[0].gid : null;
+                console.log({ file_gid, thumb_gid });
+                await service.attachments.postStep(step, uuid, file_gid, thumb_gid, attr, DB);
+                await service.attachments.setStatus(uuid, n, DB);
+              } catch (error) {
+                throw error;
               }
             }
           }
         }
       }
+    //   for (const key in sheet1) {
+    //     if (sheet1.hasOwnProperty(key) && key.startsWith('B')) {
+    //       const row = key.slice(1);
+    //       if (row !== '1') {
+    //         // 序号
+    //         snum = sheet1[`A${row}`].v.trim();
+    //         uuid = sheet1[ key ].v.trim();
+    //         const attach_file_name = sheet1[ `C${row}` ].v.trim();
+    //         if (!files.includes(attach_file_name)) throw `未找到文件 ${attach_file_name}`;
+    //       }
+    //     }
+    //   }
+    // } catch (error) {
+    //   result.push({ snum, uuid, error });
+    // }
+    // try {
+    //   if (is2to3) {
+    //     if (!files.includes(attach_file_name)) throw `未找到文件 ${attach_file_name}`;
+    //     const splitname = attach_file_name.split('.');
+    //     const file_type = splitname.pop();
+    //     const file_name = splitname.join('.');
+    //     const file_bufs = await fsPromises.readFile(files_path + '/' + attach_file_name);
+    //     const ranId = randomNegNumber();
+    //     const ranId2 = randomNegNumber();
+    //     await service.attachments.insertAttach(file_name, file_type, file_uuid, ranId, null, DB);
+    //     // console.log(1, ranId);
+    //     const attach_gid = await service.attachments.getAttachGidById(ranId, DB);
+    //     const gid1 = attach_gid[0].gid;
+    //     let gid2 = null;
+    //     if (thumb_name) {
+    //       let thumb_bufs = null;
+    //       if (!files.includes(thumb_name)) throw `未找到缩略图${thumb_name}`;
+    //       thumb_bufs = await fsPromises.readFile(files_path + '/' + thumb_name);
+    //       const splitname = thumb_name.split('.');
+    //       const file_type = splitname.pop();
+    //       const file_name = splitname.join('.');
+    //       await service.attachments.insertAttach(file_name, file_type, ranId2, thumb_bufs, null, DB);
+    //       const attach_gid = await service.attachments.getAttachGidById(ranId2, DB);
+    //       gid2 = attach_gid[0].gid;
+    //     }
+    //     // console.log(2, gid);
+    //     for (const key in sheet1) {
+    //       if (sheet1.hasOwnProperty(key) && key.startsWith('B')) {
+    //         const row = key.slice(1);
+    //         if (row !== '1') {
+    //           uuid = sheet1[ key ].v.trim();
+    //           console.log({ uuid });
+    //           snum = sheet1[`A${row}`].v.trim();
+    //           // thumb_name = sheet1[ `D${row}` ].v;
+    //           let attr;
+    //           if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v.trim();
+    //           await service.attachments.postStep(step, uuid, null, gid1, gid2, null, attr, DB);
+    //           await service.attachments.setStatus(uuid, n, DB);
+    //         }
+    //       }
+    //     }
+    //     await service.attachments.updateAttachGidById(ranId, -1, DB);
+    //     await service.attachments.updateAttachGidById(ranId2, -1, DB);
+    //   } else {
+    //     for (const key in sheet1) {
+    //       if (sheet1.hasOwnProperty(key)) {
+    //         // B is uuid
+    //         if (key.startsWith('B')) {
+    //           const row = key.slice(1);
+    //           if (row !== '1') {
+    //             try {
+    //               if (!files.includes(attach_file_name)) throw `未找到文件 ${attach_file_name}`;
+    //               uuid = sheet1[ key ].v.trim();
+    //               snum = sheet1[`A${row}`].v.trim();
+    //               if (!uuid) throw '图斑唯一标识为空';
+    //               let attr;
+    //               if (sheet1[ `E${row}` ]) attr = sheet1[ `E${row}` ].v.trim();
+    //               if (!sheet1[ `C${row}` ]) throw `未找到 ${uuid} 对应文件名`;
+    //               attach_file_name = sheet1[ `C${row}` ].v.trim();
+    //               if (!attach_file_name) throw `未找到 ${key} 对应文件名`;
+    //               let thumb_bufs = null;
+    //               thumb_name = sheet1[ `D${row}` ] ? sheet1[ `D${row}` ].v.trim() : null;
+    //               const file_bufs = await fsPromises.readFile(files_path + '/' + attach_file_name);
+    //               if (thumb_name) {
+    //                 if (!files.includes(thumb_name)) throw `未找到缩略图${thumb_name}`;
+    //                 thumb_bufs = await fsPromises.readFile(files_path + '/' + thumb_name);
+    //               }
+    //               await service.attachments.postStep(step, uuid, attach_file_name, file_bufs, thumb_bufs, thumb_name, attr, DB);
+    //               await service.attachments.setStatus(uuid, n, DB);
+    //             } catch (error) {
+    //               throw error;
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
     } catch (error) {
       console.log(3, error);
       result.push({ snum, uuid, error });
@@ -593,6 +711,22 @@ class AttachmentsController extends Controller {
       ctx.body = rb;
     }
   }
+
+  async getPlanByGid() {
+    const { ctx, service } = this;
+    const helper = ctx.helper;
+    const id = this.ctx.params.id;
+    const DB = this.ctx.params.DB;
+    try {
+      const res = await service.attachments.getPlanByGid(id, DB);
+      rb = helper.getSuccess(res);
+    } catch (error) {
+      console.log(error);
+      rb = helper.getFailed(error);
+    }
+    this.ctx.body = rb;
+  }
 }
+
 
 module.exports = AttachmentsController;

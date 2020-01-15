@@ -1,6 +1,10 @@
 'use strict';
 
 const Service = require('egg').Service;
+const fs = require('fs');
+const fsPromises = fs.promises;
+const uuid = require('uuid');
+const path = require('path');
 
 class AttachmentsService extends Service {
   // 计算空间是否包含--测试
@@ -95,19 +99,28 @@ class AttachmentsService extends Service {
     });
   }
 
+  async saveFile(buf, file_type) {
+    const file_uuid = uuid();
+    const filePath = path.join(this.config.attachDir, `${file_uuid}.${file_type}`);
+    await fsPromises.writeFile(filePath, buf);
+    return file_uuid;
+  }
+
   // 保存附件
   /**
    * save attachment to db
    * @param {string} file_name attachment file name
    * @param {string} file_type attachment file type
-   * @param {buffer} bufs file buffer
+   * @param {buffer} buf file uuid
    * @param {number} attach_to_id gid on tree table
    * @param {string} attach_type special tag ,a unique tag can only appear once each attach_to_id
    * @param {string} DB daatabase name
+   * @param {bollean} notLeef daatabase name
    */
-  async postAttachment(file_name, file_type, bufs, attach_to_id, attach_type = null, DB) {
+  async postAttachment(file_name, file_type, buf, attach_to_id, attach_type = null, DB, notLeef) {
     const sequelize = this.app.Sequelize;
     let list = [];
+    const file_uuid = await this.saveFile(buf, file_type);
     if (attach_type) {
       list = await this.app[DB].query(
         `select gid from attachments where attach_to_id = '${attach_to_id}' and attach_type = '${attach_type}';`,
@@ -118,30 +131,30 @@ class AttachmentsService extends Service {
     }
     if (list.length) {
       await this.app[DB].query(
-        `update attachments set file_name='${file_name}', file_type='${file_type}', attach_to_id='${attach_to_id}', blob_data= (?), attach_type='${attach_type}' where attach_to_id = '${attach_to_id}' and attach_type = '${attach_type}';`,
+        `update attachments set file_name='${file_name}', file_type='${file_type}', attach_to_id='${attach_to_id}', file_uuid='${file_uuid}', attach_type='${attach_type}' where attach_to_id = '${attach_to_id}' and attach_type = '${attach_type}' returning *;`,
         {
-          replacements: [ bufs ],
+          // replacements: [ bufs ],
           type: sequelize.QueryTypes.UPDATE,
         }
       );
     } else {
-      await this.insertAttach(file_name, file_type, attach_to_id, bufs, attach_type, DB);
-      await this.insertNewAttachToTree(DB);
+      await this.insertAttach(file_name, file_type, file_uuid, attach_to_id, attach_type, DB);
+      if (!notLeef) await this.insertNewAttachToTree(DB);
     }
-    return { file_name, file_type, attach_to_id, attach_type, DB };
+    return { file_name, file_type, file_uuid, attach_to_id, attach_type, DB };
   }
 
-  async insertAttach(file_name, file_type, attach_to_id, bufs, attach_type = null, DB) {
+  async insertAttach(file_name, file_type, file_uuid, attach_to_id, attach_type = null, DB) {
     const sequelize = this.app.Sequelize;
-    const sql = 'insert into attachments ( file_name, file_type, attach_to_id, blob_data, attach_type) values (:file_name, :file_type, :attach_to_id, :bufs, :attach_type);';
+    const sql = 'insert into attachments ( file_name, file_type, file_uuid, attach_to_id, attach_type) values (:file_name, :file_type, :file_uuid, :attach_to_id, :attach_type) returning *;';
     return await this.app[DB].query(sql,
       {
         type: sequelize.QueryTypes.INSERT,
         replacements: {
           file_name,
           file_type,
+          file_uuid,
           attach_to_id,
-          bufs,
           attach_type,
         },
       }
@@ -164,10 +177,10 @@ class AttachmentsService extends Service {
     );
   }
 
-  async getAttachGidById(id, DB) {
+  async getAttachGidByUuid(id, DB) {
     const sequelize = this.app.Sequelize;
     return await this.app[DB].query(
-      `select gid from attachments where attach_to_id = ${id};`,
+      `select gid from attachments where file_uuid = '${id}';`,
       {
         type: sequelize.QueryTypes.SELECT,
       }
@@ -187,7 +200,7 @@ class AttachmentsService extends Service {
   async getAttachmentById(id, DB) {
     const sequelize = this.app.Sequelize;
     return await this.app[DB].query(
-      `select  gid, attach_to_id, file_name, file_type, blob_data, attach_type from attachments where gid = ${id};`,
+      `select  gid, attach_to_id, file_name, file_type, file_uuid, attach_type from attachments where gid = ${id};`,
       {
         type: sequelize.QueryTypes.SELECT,
       }
@@ -246,24 +259,21 @@ class AttachmentsService extends Service {
   }
 
   // 状态变更
-  async postStep(step, id, fileName, bufs, thumbBufs, thumb_bufs_name, attr = null, DB) {
+  async postStep(step, id, file_gid, thumb_gid, attr = null, DB) {
     const sequelize = this.app.Sequelize;
-    const replace = [ bufs ];
-    if (thumb_bufs_name) replace.push(thumb_bufs_name);
-    if (thumbBufs) replace.push(thumbBufs);
+    const replace = [ file_gid ];
+    if (thumb_gid) replace.push(thumb_gid);
     try {
       const sql = `update plan set 
-      ${step}= (?) 
-      ${thumb_bufs_name ? `, ${step}_thumbnailname= (?)` : ''} 
-      ${thumbBufs ? `, ${step}_thumbnail= (?)` : ''} 
-      ${fileName ? `, ${step}_filename='${fileName}'` : ''}
+      ${step}= ${file_gid}
+      ${thumb_gid ? `, ${step}_thumbnail= ${thumb_gid}` : ''} 
       ${attr ? `, ${step}_1='${attr}'` : ''} 
       where uuid = '${id}';`;
       console.log({ sql, replace });
+      console.log({ sql });
       return await await this.app[DB].query(
         sql,
         {
-          replacements: replace,
           type: sequelize.QueryTypes.UPDATE,
         });
     } catch (error) {
@@ -320,6 +330,23 @@ class AttachmentsService extends Service {
     return await this.ctx[DB].query(sql, {
       type: sequelize.QueryTypes.SELECT,
     });
+  }
+
+  async getPlanByGid(gid, DB) {
+    const sequelize = this.app.Sequelize;
+    const sql = `SELECT gid, objectid, flmc, refname, shape_area, ystbbh, xzqdm, xzmc, 
+    bz, layer, status, f1to2_1, f2to3_1, f3to4_1, f4to5_1, 
+    f5to6_1, f6to7_1, uuid, xzqmc, f1to2, f2to3, f3to4, f4to5, f5to6, 
+    f6to7, f1to2_thumbnail, f2to3_thumbnail, f3to4_thumbnail, f4to5_thumbnail, 
+    f5to6_thumbnail, f6to7_thumbnail
+    FROM public.plan
+    where gid = ${gid}`;
+    return await this.app[DB].query(sql,
+      {
+        type: sequelize.QueryTypes.SELECT,
+        replacements: {},
+      }
+    );
   }
 }
 

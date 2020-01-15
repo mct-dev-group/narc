@@ -102,6 +102,7 @@ module.exports = appInfo => {
   // add your user config here
   const userConfig = {
     // myAppName: 'egg',
+    attachDir: path.join(appInfo.baseDir, 'attachs'),
   };
 
   return {
