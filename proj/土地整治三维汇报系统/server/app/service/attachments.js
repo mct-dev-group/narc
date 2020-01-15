@@ -332,11 +332,10 @@ class AttachmentsService extends Service {
     });
   }
 
-  async getPlanByGid(gid, DB) {
+  async getPlanById(gid, DB) {
     const sequelize = this.app.Sequelize;
-    const sql = `SELECT gid, objectid, flmc, refname, shape_area, ystbbh, xzqdm, xzmc, 
-    bz, layer, status, f1to2_1, f2to3_1, f3to4_1, f4to5_1, 
-    f5to6_1, f6to7_1, uuid, xzqmc, f1to2, f2to3, f3to4, f4to5, f5to6, 
+    const sql = `SELECT gid, f1to2_1, f2to3_1, f3to4_1, f4to5_1, 
+    f5to6_1, f6to7_1, uuid, f1to2, f2to3, f3to4, f4to5, f5to6, 
     f6to7, f1to2_thumbnail, f2to3_thumbnail, f3to4_thumbnail, f4to5_thumbnail, 
     f5to6_thumbnail, f6to7_thumbnail
     FROM public.plan

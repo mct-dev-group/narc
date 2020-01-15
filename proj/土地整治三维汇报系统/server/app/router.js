@@ -43,7 +43,7 @@ module.exports = app => {
   router.get('/attachs/getF6to7Attach/:id/:DB', controller.attachments.getF6to7Attach);
   router.get('/attachs/getAllFmtonAttach/:id/:DB', controller.attachments.getAllFmtonAttach);
 
-  router.get('/attachs/getPlanByGid/:id/:DB', controller.attachments.getPlanByGid);
+  router.get('/attachs/getPlanById/:id/:DB', controller.attachments.getPlanById);
 
   router.get('/geom/getCurrentAreaInfo/:id/:table/:DB', controller.geom.getCurrentAreaInfo);
   router.get('/geom/setStatus/:id/:status/:DB', controller.geom.setStatus);

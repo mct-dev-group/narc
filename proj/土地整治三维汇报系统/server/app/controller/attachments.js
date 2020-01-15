@@ -712,7 +712,7 @@ class AttachmentsController extends Controller {
     }
   }
 
-  async getPlanByGid() {
+  async getPlanById() {
     const { ctx, service } = this;
     const helper = ctx.helper;
     const id = this.ctx.params.id;
