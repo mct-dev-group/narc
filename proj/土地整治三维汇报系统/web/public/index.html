@@ -36,11 +36,15 @@
   </noscript>
   <header class='header'>
     <div class="title">
-      <span>土地整治三维汇报系统</span>
+      <span id='backToIndex' style="cursor: pointer;" title="回到首页">土地整治三维汇报系统</span>
     </div>
   </header>
   <div id="app"></div>
   <!-- built files will be auto injected -->
+  <script>
+    document.getElementById('backToIndex').addEventListener('click',function(){
+      window.location.replace('/');
+    })
+  </script>
 </body>
-
 </html>
